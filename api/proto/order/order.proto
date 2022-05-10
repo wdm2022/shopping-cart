@@ -1,6 +1,8 @@
 syntax = "proto3";
 option go_package = "api/proto/order";
 
+package order;
+
 service Order {
   rpc Ping (PingRequest) returns (PingResponse) {}
 
