@@ -1,4 +1,4 @@
-module shoppingcart
+module api_gateway
 
 go 1.18
 

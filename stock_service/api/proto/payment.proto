@@ -4,6 +4,4 @@ option go_package = "api/proto/stock";
 package stock;
 
 service Stock {
-
 }
-
