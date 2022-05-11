@@ -28,9 +28,5 @@ func RunGrpcServer(port *int) error {
 	paymentApi.RegisterPaymentServer(server, &paymentServer{})
 
 	log.Printf("server listening at %v", lis.Addr())
-	if err := server.Serve(lis); err != nil {
-		return err
-	}
-
-	return nil
+	return server.Serve(lis)
 }
