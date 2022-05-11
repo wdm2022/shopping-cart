@@ -5,8 +5,10 @@ package order;
 
 service Order {
   rpc Ping (PingRequest) returns (PingResponse) {}
-
 }
 
-message PingRequest {}
-message PingResponse {}
+message PingRequest {
+}
+message PingResponse {
+  string message = 1;
+}

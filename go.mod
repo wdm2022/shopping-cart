@@ -1,4 +1,4 @@
-module shoppingcart
+module shopping-cart
 
 go 1.18
 

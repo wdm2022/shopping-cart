@@ -4,4 +4,10 @@ option go_package = "api/proto/payment";
 package payment;
 
 service Payment {
+  rpc Ping (PingRequest) returns (PingResponse) {}
+}
+
+message PingRequest {}
+message PingResponse {
+  string message = 1;
 }
