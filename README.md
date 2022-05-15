@@ -6,6 +6,11 @@ Project for Web-scale Data Management course at TU Delft (IN4331)
 
 ## Development
 
+### Prerequisites
+
+* Go 1.18
+* [Task](https://taskfile.dev/) build tool
+
 ### Preparing the project
 
 In order to generate files, necessary for development (eg. gRPC client/server from protobuf schema)
