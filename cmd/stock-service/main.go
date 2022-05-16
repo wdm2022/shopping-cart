@@ -7,13 +7,13 @@ import (
 )
 
 var (
-	port = flag.Int("port", 50002, "The gRPC server port")
+	port = flag.Int("port", 50002, "gRPC server port")
 )
 
 func main() {
 	flag.Parse()
 
 	if err := stock.RunGrpcServer(port); err != nil {
-		log.Fatalf("failed to start grpc server: %v", err)
+		log.Fatalf("Failed to start gRPC server: %v", err)
 	}
 }
