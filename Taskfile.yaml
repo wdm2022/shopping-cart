@@ -1,13 +1,19 @@
 version: '3'
 
-vars:
-  BUILDER_IMAGE: wdm-shoppingcart-builder
+output:
+  group:
+    begin: '::begin::{{.TASK}}'
+    end: '::endgroup::'
+
+includes:
+  docker: ./build/builder/Taskfile.yaml
 
 tasks:
-  # Preparation
+  default:
+    - task: docker:run
   dev_prepare:
     - task: vendor
-    - task: generate_protobuf
+    - task: generate:protobuf
   vendor:
     cmds:
       - go mod vendor
@@ -16,92 +22,50 @@ tasks:
       - go.sum
     generates:
       - vendor/modules.txt
-  generate_protobuf:
+  generate:protobuf:
     cmds:
       - go generate -x shopping-cart/api/proto/...
     sources:
       - api/proto/**/*.proto
     generates:
       - api/proto/**/*.pb.go
-  # Run
-  run_stock_service:
-    deps: [dev_prepare]
-    cmds: ["go run shopping-cart/cmd/stock-service {{.CLI_ARGS}}"]
-  run_order_service:
-    deps: [dev_prepare]
-    cmds: ["go run shopping-cart/cmd/order-service {{.CLI_ARGS}}"]
-  run_payment_service:
-    deps: [dev_prepare]
-    cmds: ["go run shopping-cart/cmd/payment-service {{.CLI_ARGS}}"]
-  run_api_gateway:
+  build:
+    - task: api_gateway:build
+    - task: stock_service:build
+    - task: payment_service:build
+    - task: order_service:build
+  ########## API Gateway ###############################################################################################
+  api_gateway:run:
     deps: [dev_prepare]
     cmds: ["go run shopping-cart/cmd/api-gateway {{.CLI_ARGS}}"]
-  # Build
-  build:
-    - task: build_stock_service
-    - task: build_order_service
-    - task: build_payment_service
-    - task: build_api_gateway
-  build_stock_service:
+  api_gateway:build:
     deps: [dev_prepare]
-    vars:
-      OUTPUT: dist/stock-service
-    cmds:
-      - go build -o dist/ shopping-cart/cmd/stock-service
-    generates:
-      - dist
-  build_order_service:
+    cmds: ["go build -o dist/ shopping-cart/cmd/api-gateway"]
+  ########## Stock Service #############################################################################################
+  stock_service:run:
     deps: [dev_prepare]
-    cmds:
-      - go build -o dist/ shopping-cart/cmd/order-service
-    generates:
-      - dist
-  build_payment_service:
+    cmds: ["go run shopping-cart/cmd/stock-service {{.CLI_ARGS}}"]
+  stock_service:build:
     deps: [dev_prepare]
-    cmds:
-      - go build -o dist/ shopping-cart/cmd/payment-service
-    generates:
-      - dist
-  build_api_gateway:
+    cmds: ["go build -o dist/ shopping-cart/cmd/stock-service"]
+  ########## Payment Service ###########################################################################################
+  payment_service:run:
     deps: [dev_prepare]
-    cmds:
-      - go build -o dist/ shopping-cart/cmd/api-gateway
-    generates:
-      - dist
-  # Cleanup
-  clean_protobuf: find api/proto -type f -name "*.pb.go" -delete
-  clean_dist: rm -rf dist
+    cmds: ["go run shopping-cart/cmd/payment-service {{.CLI_ARGS}}"]
+  payment_service:build:
+    deps: [dev_prepare]
+    cmds: ["go build -o dist/ shopping-cart/cmd/payment-service"]
+  ########## Order Service #############################################################################################
+  order_service:run:
+    deps: [dev_prepare]
+    cmds: ["go run shopping-cart/cmd/order-service {{.CLI_ARGS}}"]
+  order_service:build:
+    deps: [dev_prepare]
+    cmds: ["go build -o dist/ shopping-cart/cmd/order-service"]
+  ########## Cleanup ###################################################################################################
+  clean:protobuf: find api/proto -type f -name "*.pb.go" -delete
+  clean:dist: rm -rf dist
   clean:
-    - task: clean_protobuf
-    - task: clean_dist
+    - task: clean:protobuf
+    - task: clean:dist
     - rm -rf vendor
-  # Docker
-  docker_build:
-    cmds:
-      - docker build -t {{.BUILDER_IMAGE}} -f build/builder/Dockerfile .
-    sources:
-      - build/builder/**
-    status:
-      - docker inspect {{.BUILDER_IMAGE}}
-  # TODO: two versions of the docker task, for Windows and UNIX
-  docker:
-    vars:
-      UID:
-        sh: id -u
-      GID:
-        sh: id -g
-      PWD:
-        sh: pwd
-    deps: [docker_build]
-    cmds:
-      - >
-        docker run -it
-        --network host
-        --user {{.UID}}:{{.GID}}
-        --workdir /project
-        --env GOCACHE=/tmp/gocache
-        --volume {{.PWD}}:/project
-        {{.BUILDER_IMAGE}}
-        {{.CLI_ARGS}}
-
-

@@ -1,0 +1,31 @@
+version: '3'
+
+vars:
+  BUILDER_IMAGE: wdm-shoppingcart-builder
+
+tasks:
+  build_builder:
+    cmds:
+      - docker build -t {{.BUILDER_IMAGE}} -f build/builder/Dockerfile .
+  # TODO: two versions of the docker task, for Windows and UNIX
+  run:
+    deps: [build_builder]
+    interactive: true
+    vars:
+      UID:
+        sh: id -u
+      GID:
+        sh: id -g
+      PWD:
+        sh: pwd
+    cmds:
+      - >
+        docker run -it
+        --network host
+        --user {{.UID}}:{{.GID}}
+        --workdir /project
+        --env GOCACHE=/tmp/gocache
+        --volume {{.PWD}}:/project
+        {{.BUILDER_IMAGE}}
+        {{.CLI_ARGS}}
+  
