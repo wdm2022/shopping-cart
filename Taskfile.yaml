@@ -1,9 +1,6 @@
 version: '3'
 
-output:
-  group:
-    begin: '::begin::{{.TASK}}'
-    end: '::endgroup::'
+output: prefixed
 
 includes:
   docker: ./build/builder/Taskfile.yaml
