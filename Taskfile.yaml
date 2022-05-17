@@ -46,7 +46,7 @@ tasks:
     cmds: ["go build -o dist/ shopping-cart/cmd/api-gateway"]
   api_gateway:build_docker:
     deps: [docker:build_builder]
-    cmds: ["docker build -t wdm-shoppingcart/api-gateway -f build/api-gateway/Dockerfile ."]
+    cmds: ["docker build -t wdm-shoppingcart/api-gateway -f docker/api-gateway/Dockerfile ."]
   ########## Stock Service #############################################################################################
   stock_service:run:
     deps: [prepare]
@@ -56,7 +56,7 @@ tasks:
     cmds: ["go build -o dist/ shopping-cart/cmd/stock-service"]
   stock_service:build_docker:
     deps: [docker:build_builder]
-    cmds: ["docker build -t wdm-shoppingcart/stock-service -f build/stock-service/Dockerfile ."]
+    cmds: ["docker build -t wdm-shoppingcart/stock-service -f docker/stock-service/Dockerfile ."]
   ########## Payment Service ###########################################################################################
   payment_service:run:
     deps: [prepare]
@@ -66,7 +66,7 @@ tasks:
     cmds: ["go build -o dist/ shopping-cart/cmd/payment-service"]
   payment_service:build_docker:
     deps: [docker:build_builder]
-    cmds: ["docker build -t wdm-shoppingcart/payment-service -f build/payment-service/Dockerfile ."]
+    cmds: ["docker build -t wdm-shoppingcart/payment-service -f docker/payment-service/Dockerfile ."]
   ########## Order Service #############################################################################################
   order_service:run:
     deps: [prepare]
@@ -76,7 +76,7 @@ tasks:
     cmds: ["go build -o dist/ shopping-cart/cmd/order-service"]
   order_service:build_docker:
     deps: [docker:build_builder]
-    cmds: ["docker build -t wdm-shoppingcart/order-service -f build/order-service/Dockerfile ."]
+    cmds: ["docker build -t wdm-shoppingcart/order-service -f docker/order-service/Dockerfile ."]
   ########## Cleanup ###################################################################################################
   clean:protobuf: find api/proto -type f -name "*.pb.go" -delete
   clean:dist: rm -rf dist
