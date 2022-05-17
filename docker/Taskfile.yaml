@@ -17,6 +17,8 @@ tasks:
         sh: id -g
       PWD:
         sh: pwd
+      SERVICE_NAME:
+        sh: basename "$PWD"
     cmds:
       - >
         docker run -it
@@ -25,6 +27,8 @@ tasks:
         --workdir /project
         --env GOCACHE=/tmp/gocache
         --volume {{.PWD}}:/project
+        --rm
+        --name {{.SERVICE_NAME}}
         {{.BUILDER_IMAGE}}
         {{.CLI_ARGS}}
   

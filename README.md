@@ -14,14 +14,14 @@ Project for Web-scale Data Management course at TU Delft (IN4331)
 
 #### For Windows
 
-* [WSL2](https://docs.microsoft.com/en-us/windows/wsl/install) 
+* [WSL2](https://docs.microsoft.com/en-us/windows/wsl/install)
   * Docker tasks work natively only under Linux and (possibly) macOS.
     On Windows use WSL2.
 
 #### When Docker builder image is not used
 
-* [Protocol buffer compiler](https://grpc.io/docs/protoc-installation/) 
-  with its [Go plugins](https://grpc.io/docs/languages/go/quickstart/) 
+* [Protocol buffer compiler](https://grpc.io/docs/protoc-installation/)
+  with its [Go plugins](https://grpc.io/docs/languages/go/quickstart/)
 
 ### Preparing the project
 
