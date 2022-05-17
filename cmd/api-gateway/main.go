@@ -4,6 +4,9 @@ import (
 	"flag"
 	"log"
 	"shopping-cart/pkg/api"
+	"shopping-cart/pkg/order"
+	"shopping-cart/pkg/payment"
+	"shopping-cart/pkg/stock"
 )
 
 var (
@@ -16,6 +19,16 @@ var (
 
 func main() {
 	flag.Parse()
+
+	orderServiceConn := order.Connect(orderServiceAddr)
+	paymentServiceConn := payment.Connect(paymentServiceAddr)
+	stockServiceConn := stock.Connect(stockServiceAddr)
+
+	defer func() {
+		_ = orderServiceConn.Close()
+		_ = paymentServiceConn.Close()
+		_ = stockServiceConn.Close()
+	}()
 
 	if err := api.RunHttpServer(port, prefork); err != nil {
 		log.Fatalf("Failed to start HTTP server: %v", err)
