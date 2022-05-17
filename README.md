@@ -9,12 +9,14 @@ Project for Web-scale Data Management course at TU Delft (IN4331)
 ### Prerequisites
 
 * Go 1.18 or newer
-* Docker
+* Docker 20.10 or newer
 * [Task](https://taskfile.dev/) build tool
 
 #### For Windows
 
-* [WSL2](https://docs.microsoft.com/en-us/windows/wsl/install)
+* [WSL2](https://docs.microsoft.com/en-us/windows/wsl/install) 
+  * Docker tasks work natively only under Linux and (possibly) macOS.
+    On Windows use WSL2.
 
 #### When Docker builder image is not used
 
@@ -27,12 +29,26 @@ In order to generate files, necessary for development (eg. gRPC client/server fr
 and perform vendoring, execute the `dev_prepare` task:
 
 ```shell
-task -- task dev_prepare
+task -- task prepare
+```
+
+### Starting runtime dependencies
+
+In order to start necessary runtime dependencies (eg. MongoDB), execute:
+
+```shell
+task dev:compose_up
+```
+
+In order to remove the containers and their data, run:
+
+```shell
+task dev:compose_down
 ```
 
 ### Running the services
 
-Individual services can be built and executed locally with the `run_*` Makefile targets.
+Individual services can be built and executed locally with the `run_*` Task tasks.
 For example, in order to run the API gateway service, execute:
 
 ```shell
@@ -41,7 +57,7 @@ task -- task api_gateway:run
 
 ### Running Docker builder image to execute arbitrary commands
 
-Simply run:
+In order to launch Docker container with the project's directory mounted, execute:
 
 ```shell
 task

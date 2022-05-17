@@ -1,3 +1,4 @@
+# Builder container image
 FROM golang:1.18.2-alpine3.15
 
 RUN apk add --no-cache curl protoc

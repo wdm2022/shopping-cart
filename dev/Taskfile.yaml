@@ -1,0 +1,7 @@
+version: '3'
+
+tasks:
+  compose_up: docker compose up -d
+  compose_down: docker compose down --volumes
+  compose_start: docker compose start
+  compose_stop: docker compose stop

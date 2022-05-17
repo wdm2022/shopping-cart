@@ -6,8 +6,7 @@ vars:
 tasks:
   build_builder:
     cmds:
-      - docker build -t {{.BUILDER_IMAGE}} -f build/builder/Dockerfile .
-  # TODO: two versions of the docker task, for Windows and UNIX
+      - docker build -t {{.BUILDER_IMAGE}} -f docker/Dockerfile .
   run:
     deps: [build_builder]
     interactive: true
