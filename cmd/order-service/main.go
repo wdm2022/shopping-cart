@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	"github.com/ilyakaznacheev/cleanenv"
 	"log"
 	"shopping-cart/pkg/order"
 	"shopping-cart/pkg/payment"
@@ -9,16 +10,21 @@ import (
 )
 
 var (
-	port               = flag.Int("port", 50000, "gRPC server port")
-	paymentServiceAddr = flag.String("payment-service-addr", "localhost:50001", "address of the payment service")
-	stockServiceAddr   = flag.String("stock-service-addr", "localhost:50002", "address of the stock service")
+	port       = flag.Int("port", 50000, "gRPC server port")
+	configFile = flag.String("config-file", "config.yaml", "Path to YAML configuration file")
 )
 
 func main() {
 	flag.Parse()
 
-	paymentServiceConn := payment.Connect(paymentServiceAddr)
-	stockServiceConn := stock.Connect(stockServiceAddr)
+	var config order.Config
+	err := cleanenv.ReadConfig(*configFile, &config)
+	if err != nil {
+		log.Printf("Error when loading config: %v", config)
+	}
+
+	paymentServiceConn := payment.Connect(config.PaymentService.Address)
+	stockServiceConn := stock.Connect(config.StockService.Address)
 
 	defer func() {
 		_ = paymentServiceConn.Close()

@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	"github.com/ilyakaznacheev/cleanenv"
 	"log"
 	"shopping-cart/pkg/api"
 	"shopping-cart/pkg/order"
@@ -10,19 +11,23 @@ import (
 )
 
 var (
-	port               = flag.Int("port", 8080, "HTTP server port")
-	prefork            = flag.Bool("prefork", false, "Spawn multiple listener processes")
-	orderServiceAddr   = flag.String("order-service-addr", "localhost:50000", "address of the order service")
-	paymentServiceAddr = flag.String("payment-service-addr", "localhost:50001", "address of the payment service")
-	stockServiceAddr   = flag.String("stock-service-addr", "localhost:50002", "address of the stock service")
+	port       = flag.Int("port", 8080, "HTTP server port")
+	prefork    = flag.Bool("prefork", false, "Spawn multiple listener processes")
+	configFile = flag.String("config-file", "config.yaml", "Path to YAML configuration file")
 )
 
 func main() {
 	flag.Parse()
 
-	orderServiceConn := order.Connect(orderServiceAddr)
-	paymentServiceConn := payment.Connect(paymentServiceAddr)
-	stockServiceConn := stock.Connect(stockServiceAddr)
+	var config api.Config
+	err := cleanenv.ReadConfig(*configFile, &config)
+	if err != nil {
+		log.Printf("Error when loading config: %v", config)
+	}
+
+	orderServiceConn := order.Connect(config.OrderService.Address)
+	paymentServiceConn := payment.Connect(config.PaymentService.Address)
+	stockServiceConn := stock.Connect(config.StockService.Address)
 
 	defer func() {
 		_ = orderServiceConn.Close()
