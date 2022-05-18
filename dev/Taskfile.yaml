@@ -3,12 +3,12 @@ version: '3'
 output: interleaved
 
 vars:
-  COMPOSE: "docker compose --project-directory . -f dev/docker-compose.yml"
+  DEV_COMPOSE: "docker compose --project-directory . -f dev/docker-compose.yml"
 
 tasks:
-  compose: "{{.COMPOSE}} {{.CLI_ARGS}}"
-  compose:up: "{{.COMPOSE}} up --build --detach"
-  compose:start: "{{.COMPOSE}} up"
-  compose:stop: "{{.COMPOSE}} stop"
-  compose:down: "{{.COMPOSE}} down --volumes"
-  compose:logs: "{{.COMPOSE}} logs -f {{.CLI_ARGS}}"
+  compose: "{{.DEV_COMPOSE}} {{.CLI_ARGS}}"
+  compose:up: "{{.DEV_COMPOSE}} up --build --detach"
+  compose:start: "{{.DEV_COMPOSE}} up"
+  compose:stop: "{{.DEV_COMPOSE}} stop"
+  compose:down: "{{.DEV_COMPOSE}} down --volumes"
+  compose:logs: "{{.DEV_COMPOSE}} logs -f {{.CLI_ARGS}}"
