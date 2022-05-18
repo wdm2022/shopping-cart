@@ -34,13 +34,13 @@ The Compose operations are wrapped into Task tasks.
 Make sure that the Docker daemon is running and execute:
 
 ```shell
-task dev:compose_up
+task dev:compose:up
 ```
 
 In order to remove the containers and their data, run:
 
 ```shell
-task dev:compose_down
+task dev:compose:down
 ```
 
 To execute arbitrary Docker Compose command `<COMMAND>`, call:

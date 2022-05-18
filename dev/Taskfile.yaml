@@ -7,8 +7,8 @@ vars:
 
 tasks:
   compose: "{{.COMPOSE}} {{.CLI_ARGS}}"
-  compose_up: "{{.COMPOSE}} up --build --detach"
-  compose_start: "{{.COMPOSE}} up"
-  compose_stop: "{{.COMPOSE}} stop"
-  compose_down: "{{.COMPOSE}} down --volumes"
-  compose_logs: "{{.COMPOSE}} logs -f {{.CLI_ARGS}}"
+  compose:up: "{{.COMPOSE}} up --build --detach"
+  compose:start: "{{.COMPOSE}} up"
+  compose:stop: "{{.COMPOSE}} stop"
+  compose:down: "{{.COMPOSE}} down --volumes"
+  compose:logs: "{{.COMPOSE}} logs -f {{.CLI_ARGS}}"
