@@ -1,0 +1,4 @@
+mongo:
+  username: "order"
+  password: "password"
+  database: "order"

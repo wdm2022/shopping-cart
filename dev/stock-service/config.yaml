@@ -1,0 +1,4 @@
+mongo:
+  username: "stock"
+  password: "password"
+  database: "stock"

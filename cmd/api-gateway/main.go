@@ -13,7 +13,7 @@ import (
 var (
 	port       = flag.Int("port", 8080, "HTTP server port")
 	prefork    = flag.Bool("prefork", false, "Spawn multiple listener processes")
-	configFile = flag.String("config-file", "config.yaml", "Path to YAML configuration file")
+	configFile = flag.String("config-file", "dev/api-gateway/config.yaml", "Path to YAML configuration file")
 	helpConfig = flag.Bool("help-config", false, "Display configuration")
 )
 
