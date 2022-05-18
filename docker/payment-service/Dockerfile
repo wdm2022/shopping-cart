@@ -9,6 +9,6 @@ FROM alpine:3.15 AS final
 EXPOSE 50001
 
 WORKDIR /app
-COPY --from=builder /project/dist/payment-service .
+COPY --from=builder /project/out/payment-service .
 
 ENTRYPOINT ["/app/payment-service"]
