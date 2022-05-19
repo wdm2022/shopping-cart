@@ -6,12 +6,11 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
-	"log"
 	"shopping-cart/pkg/db"
 )
 
 const (
-	DbName         = "orders"
+	DbName         = "order"
 	CollectionName = "orders"
 )
 
@@ -21,12 +20,7 @@ type OrdersConnection struct {
 	//add a context with timeout?
 }
 
-func Init() *OrdersConnection {
-	client, err := db.InitClient()
-
-	if err != nil {
-		log.Fatal(err, " Could not initialize mongo client")
-	}
+func Init(client *mongo.Client) *OrdersConnection {
 	database := client.Database(DbName)
 	return &OrdersConnection{
 		MongoConnection: db.MongoConnection{
@@ -67,6 +61,7 @@ func (orderConn *OrdersConnection) EmptyOrder(userId string) (string, error) {
 	}
 
 	order := Order{
+		OrderId:   primitive.NewObjectID(),
 		Paid:      false,
 		Items:     []string{},
 		UserId:    objId,
