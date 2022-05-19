@@ -1,3 +1,5 @@
+# Run from the project's root as the working directory for Compose
+
 services:
   mongo:
     image: mongo:4.4

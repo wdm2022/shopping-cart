@@ -9,6 +9,6 @@ FROM alpine:3.15 AS final
 EXPOSE 50000
 
 WORKDIR /app
-COPY --from=builder /project/dist/order-service .
+COPY --from=builder /project/out/order-service .
 
 ENTRYPOINT ["/app/order-service"]

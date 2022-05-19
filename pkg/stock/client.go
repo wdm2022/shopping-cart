@@ -11,8 +11,8 @@ var (
 	client stockApi.StockClient
 )
 
-func Connect(address *string) *grpc.ClientConn {
-	conn, err := grpc.Dial(*address, grpc.WithTransportCredentials(insecure.NewCredentials()))
+func Connect(address string) *grpc.ClientConn {
+	conn, err := grpc.Dial(address, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		log.Fatalf("couldn't connect to stock service: %v", err)
 	}

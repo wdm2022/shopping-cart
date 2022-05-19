@@ -1,0 +1,46 @@
+# Run from the project's root as the working directory for Compose
+
+services:
+  api-gateway:
+    restart: on-failure
+    build:
+      context: .
+      dockerfile: docker/api-gateway/Dockerfile
+    ports:
+      - "127.0.0.1:8080:8080"
+  order-service:
+    restart: on-failure
+    build:
+      context: .
+      dockerfile: docker/order-service/Dockerfile
+    ports:
+      - "127.0.0.1:50000:50000"
+    environment:
+      MONGO_HOST: "mongo"
+      MONGO_USERNAME: "order"
+      MONGO_PASSWORD: "password"
+      MONGO_DATABASE: "order"
+  payment-service:
+    restart: on-failure
+    build:
+      context: .
+      dockerfile: docker/payment-service/Dockerfile
+    ports:
+      - "127.0.0.1:50001:50001"
+    environment:
+      MONGO_HOST: "mongo"
+      MONGO_USERNAME: "payment"
+      MONGO_PASSWORD: "password"
+      MONGO_DATABASE: "payment"
+  stock-service:
+    restart: on-failure
+    build:
+      context: .
+      dockerfile: docker/stock-service/Dockerfile
+    ports:
+      - "127.0.0.1:50002:50002"
+    environment:
+      MONGO_HOST: "mongo"
+      MONGO_USERNAME: "stock"
+      MONGO_PASSWORD: "password"
+      MONGO_DATABASE: "stock"

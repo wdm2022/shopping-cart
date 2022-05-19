@@ -7,22 +7,28 @@ import (
 	"shopping-cart/pkg/order"
 	"shopping-cart/pkg/payment"
 	"shopping-cart/pkg/stock"
+	configUtils "shopping-cart/pkg/utils/config"
 )
 
 var (
-	port               = flag.Int("port", 8080, "HTTP server port")
-	prefork            = flag.Bool("prefork", false, "Spawn multiple listener processes")
-	orderServiceAddr   = flag.String("order-service-addr", "localhost:50000", "address of the order service")
-	paymentServiceAddr = flag.String("payment-service-addr", "localhost:50001", "address of the payment service")
-	stockServiceAddr   = flag.String("stock-service-addr", "localhost:50002", "address of the stock service")
+	port       = flag.Int("port", 8080, "HTTP server port")
+	prefork    = flag.Bool("prefork", false, "Spawn multiple listener processes")
+	configFile = flag.String("config-file", "dev/api-gateway/config.yaml", "Path to YAML configuration file")
+	helpConfig = flag.Bool("help-config", false, "Display configuration")
 )
 
 func main() {
 	flag.Parse()
 
-	orderServiceConn := order.Connect(orderServiceAddr)
-	paymentServiceConn := payment.Connect(paymentServiceAddr)
-	stockServiceConn := stock.Connect(stockServiceAddr)
+	var config api.Config
+	if *helpConfig {
+		configUtils.PrintConfigHelp(config)
+	}
+	configUtils.ReadConfig(*configFile, &config)
+
+	orderServiceConn := order.Connect(config.OrderService.Address)
+	paymentServiceConn := payment.Connect(config.PaymentService.Address)
+	stockServiceConn := stock.Connect(config.StockService.Address)
 
 	defer func() {
 		_ = orderServiceConn.Close()
