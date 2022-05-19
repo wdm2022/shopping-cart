@@ -63,7 +63,7 @@ func (orderConn *OrdersConnection) EmptyOrder(userId string) (string, error) {
 	order := Order{
 		OrderId:   primitive.NewObjectID(),
 		Paid:      false,
-		Items:     []string{},
+		Items:     []primitive.ObjectID{},
 		UserId:    objId,
 		TotalCost: 0,
 	}
