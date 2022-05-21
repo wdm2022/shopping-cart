@@ -10,6 +10,6 @@ const (
 
 type Stock struct {
 	ItemId primitive.ObjectID `bson:"_id"`
-	Price  float64            `bson:"price"`
-	Amount uint64             `bson:"stock"`
+	Price  int64              `bson:"price"`
+	Amount int64              `bson:"stock"`
 }

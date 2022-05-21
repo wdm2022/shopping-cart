@@ -15,5 +15,5 @@ type Order struct {
 	Paid      bool                 `bson:"paid"`
 	Items     []primitive.ObjectID `bson:"items"`
 	UserId    primitive.ObjectID   `bson:"user_id"`
-	TotalCost float64              `bson:"total_cost"`
+	TotalCost int64                `bson:"total_cost"`
 }

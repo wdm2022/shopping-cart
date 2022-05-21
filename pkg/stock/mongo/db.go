@@ -34,7 +34,7 @@ func Init(client *mongo.Client) *OrdersConnection {
 /*
 Create a new item with the given price and return its id
 */
-func (o *OrdersConnection) NewItem(price float64) (string, error) {
+func (o *OrdersConnection) NewItem(price int64) (string, error) {
 
 	stock := Stock{
 		ItemId: primitive.NewObjectID(),
@@ -52,7 +52,7 @@ func (o *OrdersConnection) NewItem(price float64) (string, error) {
 
 }
 
-func (o *OrdersConnection) addStock(itemId string, amount uint64) error {
+func (o *OrdersConnection) addStock(itemId string, amount int64) error {
 
 	objId, err := primitive.ObjectIDFromHex(itemId)
 	if err != nil {
@@ -77,7 +77,7 @@ func (o *OrdersConnection) addStock(itemId string, amount uint64) error {
 
 }
 
-func (o *OrdersConnection) SubtractStock(itemId string, amount uint64) error {
+func (o *OrdersConnection) SubtractStock(itemId string, amount int) error {
 
 	objId, err := primitive.ObjectIDFromHex(itemId)
 	if err != nil {
@@ -85,7 +85,7 @@ func (o *OrdersConnection) SubtractStock(itemId string, amount uint64) error {
 	}
 	query := bson.D{{ItemId, objId}}
 
-	add := bson.D{{"$inc", bson.D{{StockAmount, 0 - (int64(amount))}}}}
+	add := bson.D{{"$inc", bson.D{{StockAmount, 0 - (amount)}}}}
 
 	res, err := o.OrderCollection.UpdateOne(context.Background(), query, add)
 
