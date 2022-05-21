@@ -14,27 +14,27 @@ const (
 	CollectionName = "stock"
 )
 
-type OrdersConnection struct {
+type StockConnection struct {
 	db.MongoConnection
-	OrderCollection *mongo.Collection
+	StockCollection *mongo.Collection
 	//add a context with timeout?
 }
 
-func Init(client *mongo.Client) *OrdersConnection {
+func Init(client *mongo.Client) *StockConnection {
 	database := client.Database(DbName)
-	return &OrdersConnection{
+	return &StockConnection{
 		MongoConnection: db.MongoConnection{
 			Database: database,
 			Client:   client,
 		},
-		OrderCollection: database.Collection(CollectionName),
+		StockCollection: database.Collection(CollectionName),
 	}
 }
 
 /*
 Create a new item with the given price and return its id
 */
-func (o *OrdersConnection) NewItem(price int64) (string, error) {
+func (o *StockConnection) NewItem(price int64) (string, error) {
 
 	stock := Stock{
 		ItemId: primitive.NewObjectID(),
@@ -42,7 +42,7 @@ func (o *OrdersConnection) NewItem(price int64) (string, error) {
 		Amount: 0,
 	}
 
-	res, err := o.OrderCollection.InsertOne(context.Background(),
+	res, err := o.StockCollection.InsertOne(context.Background(),
 		stock)
 
 	if err != nil {
@@ -52,7 +52,7 @@ func (o *OrdersConnection) NewItem(price int64) (string, error) {
 
 }
 
-func (o *OrdersConnection) addStock(itemId string, amount int64) error {
+func (o *StockConnection) addStock(itemId string, amount int64) error {
 
 	objId, err := primitive.ObjectIDFromHex(itemId)
 	if err != nil {
@@ -62,7 +62,7 @@ func (o *OrdersConnection) addStock(itemId string, amount int64) error {
 
 	add := bson.D{{"$inc", bson.D{{StockAmount, amount}}}}
 
-	res, err := o.OrderCollection.UpdateOne(context.Background(), query, add)
+	res, err := o.StockCollection.UpdateOne(context.Background(), query, add)
 
 	if err != nil {
 		return err
@@ -77,7 +77,7 @@ func (o *OrdersConnection) addStock(itemId string, amount int64) error {
 
 }
 
-func (o *OrdersConnection) SubtractStock(itemId string, amount int) error {
+func (o *StockConnection) SubtractStock(itemId string, amount int) error {
 
 	objId, err := primitive.ObjectIDFromHex(itemId)
 	if err != nil {
@@ -87,7 +87,7 @@ func (o *OrdersConnection) SubtractStock(itemId string, amount int) error {
 
 	add := bson.D{{"$inc", bson.D{{StockAmount, 0 - (amount)}}}}
 
-	res, err := o.OrderCollection.UpdateOne(context.Background(), query, add)
+	res, err := o.StockCollection.UpdateOne(context.Background(), query, add)
 
 	if err != nil {
 		return err
@@ -102,7 +102,7 @@ func (o *OrdersConnection) SubtractStock(itemId string, amount int) error {
 
 }
 
-func (o *OrdersConnection) findStock(itemId string) (*Stock, error) {
+func (o *StockConnection) findStock(itemId string) (*Stock, error) {
 
 	objId, err := primitive.ObjectIDFromHex(itemId)
 	if err != nil {
@@ -110,7 +110,7 @@ func (o *OrdersConnection) findStock(itemId string) (*Stock, error) {
 	}
 	query := bson.D{{ItemId, objId}}
 
-	res := o.OrderCollection.FindOne(context.Background(), query)
+	res := o.StockCollection.FindOne(context.Background(), query)
 
 	if res.Err() != nil {
 		return nil, res.Err()
