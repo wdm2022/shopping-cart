@@ -3,14 +3,17 @@ package order
 import (
 	"context"
 	"fmt"
+	"go.mongodb.org/mongo-driver/mongo"
 	"google.golang.org/grpc"
 	"log"
 	"net"
 	orderApi "shopping-cart/api/proto/order"
+	mongo2 "shopping-cart/pkg/order/mongo"
 )
 
 type orderServer struct {
 	orderApi.OrderServer
+	orderConn *mongo2.OrdersConnection
 }
 
 // **************** Interface methods *********************
@@ -23,7 +26,11 @@ func (o orderServer) Ping(ctx context.Context, in *orderApi.EmptyMessage) (*orde
 func (o orderServer) CreateOrder(ctx context.Context, in *orderApi.CreateOrderRequest) (*orderApi.CreateOrderResponse, error) {
 	fmt.Println("Received a new order request for user: ", in.UserId)
 
-	var newOrderId = createNewOrder(in.UserId)
+	var newOrderId, err = createNewOrder(o.orderConn, in.UserId)
+
+	if err != nil {
+		return nil, err
+	}
 
 	return &orderApi.CreateOrderResponse{OrderId: newOrderId}, nil
 }
@@ -31,7 +38,10 @@ func (o orderServer) CreateOrder(ctx context.Context, in *orderApi.CreateOrderRe
 func (o orderServer) RemoveOrder(ctx context.Context, in *orderApi.RemoveOrderRequest) (*orderApi.EmptyMessage, error) {
 	fmt.Println("Received a remove order request for order: ", in.OrderId)
 
-	removeOrder(in.OrderId)
+	err := o.orderConn.DeleteOrder(in.OrderId)
+	if err != nil {
+		return nil, err
+	}
 
 	return &orderApi.EmptyMessage{}, nil
 }
@@ -39,13 +49,13 @@ func (o orderServer) RemoveOrder(ctx context.Context, in *orderApi.RemoveOrderRe
 func (o orderServer) GetOrder(ctx context.Context, in *orderApi.GetOrderRequest) (*orderApi.GetOrderResponse, error) {
 	fmt.Println("Received a get order detail request for order: ", in.OrderId)
 
-	var order = getOrder(in.OrderId)
+	var order, err = o.orderConn.FindOrder(in.OrderId)
 
-	return &orderApi.GetOrderResponse{OrderId: order.orderId,
-		Paid:      order.paid,
-		UserId:    order.userId,
-		TotalCost: order.totalCost,
-		ItemIds:   order.itemIds}, nil
+	return &orderApi.GetOrderResponse{OrderId: order.OrderId,
+		Paid:      order.Paid,
+		UserId:    order.UserId,
+		TotalCost: order.TotalCost,
+		ItemIds:   order.Items}, nil
 }
 
 func (o orderServer) AddItem(ctx context.Context, in *orderApi.AddItemRequest) (*orderApi.EmptyMessage, error) {
@@ -72,14 +82,16 @@ func (o orderServer) Checkout(ctx context.Context, in *orderApi.CheckoutRequest)
 	return &orderApi.EmptyMessage{}, nil
 }
 
-func RunGrpcServer(port *int) error {
+func RunGrpcServer(client *mongo.Client, port *int) error {
 	lis, err := net.Listen("tcp", fmt.Sprintf(":%d", *port))
 	if err != nil {
 		return err
 	}
 
+	orderConn := mongo2.Init(client)
+
 	server := grpc.NewServer()
-	orderApi.RegisterOrderServer(server, &orderServer{})
+	orderApi.RegisterOrderServer(server, &orderServer{orderConn: orderConn})
 
 	log.Printf("server listening at %v", lis.Addr())
 	return server.Serve(lis)
@@ -87,21 +99,31 @@ func RunGrpcServer(port *int) error {
 
 // *********************** Server methods **********************
 
-func createNewOrder(userId uint32) uint32 {
+func createNewOrder(o *mongo2.OrdersConnection, userId []byte) ([]byte, error) {
 	// TODO: Create a new order id for the given UserId. Add it to the DB and return the new order number
-	return 1
+
+	res, err := o.EmptyOrder(userId)
+	if err != nil {
+		return []byte{}, err
+	}
+	return res, nil
 }
 
-func removeOrder(orderId uint32) {
+func removeOrder(o *mongo2.OrdersConnection, orderId []byte) error {
 	// TODO: Remove order from DB
+	err := o.DeleteOrder(orderId)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
-func getOrder(orderId uint32) orderDetails {
+func getOrder(orderId []byte) orderDetails {
 	//TODO: Collect order details from database replace for holders
-	var userId uint32 = 1
+	var userId []byte
 	var paid bool = false
 	var totalCost float32 = 0
-	var itemIds []uint32 = []uint32{1}
+	var itemIds = [][]byte{{}}
 
 	return orderDetails{
 		orderId:   orderId,
@@ -111,22 +133,22 @@ func getOrder(orderId uint32) orderDetails {
 		itemIds:   itemIds}
 }
 
-func addItemToOrder(orderId uint32, itemId uint32) {
+func addItemToOrder(orderId []byte, itemId []byte) {
 	// TODO: Add item to order
 }
 
-func removeItemFromOrder(orderId uint32, itemId uint32) {
+func removeItemFromOrder(orderId []byte, itemId []byte) {
 	// TODO: Remove item from order
 }
 
-func checkoutOrder(id uint32) {
+func checkoutOrder(id []byte) {
 	// TODO: Checkout order
 }
 
 type orderDetails struct {
-	orderId   uint32
-	userId    uint32
+	orderId   []byte
+	userId    []byte
 	paid      bool
 	totalCost float32
-	itemIds   []uint32
+	itemIds   [][]byte
 }

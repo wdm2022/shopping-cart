@@ -14,42 +14,42 @@ service Order {
 }
 
 message CreateOrderRequest {
-  uint32 userId = 1;
+  bytes userId = 1;
 }
 
 message CreateOrderResponse {
-  uint32 orderId = 1;
+  bytes orderId = 1;
 }
 
 message RemoveOrderRequest {
-  uint32 orderId = 1;
+  bytes orderId = 1;
 }
 
 
 message GetOrderRequest {
-  uint32 orderId = 1;
+  bytes orderId = 1;
 }
 
 message GetOrderResponse {
-  uint32 orderId = 1;
+  bytes orderId = 1;
   bool paid = 2;
-  uint32 userId = 3;
+  bytes userId = 3;
   float totalCost = 4;
-  repeated uint32 itemIds = 5;
+  repeated bytes itemIds = 5;
 }
 
 message AddItemRequest {
-  uint32 orderId = 1;
-  uint32 itemId = 2;
+  bytes orderId = 1;
+  bytes itemId = 2;
 }
 
 message RemoveItemRequest {
-  uint32 orderId = 1;
-  uint32 itemId = 2;
+  bytes orderId = 1;
+  bytes itemId = 2;
 }
 
 message CheckoutRequest {
-  uint32 orderId = 1;
+  bytes orderId = 1;
 }
 
 message PingResponse {
