@@ -78,7 +78,9 @@ tasks:
     deps: [docker:build_builder]
     cmds: ["docker build -t wdm-shoppingcart/order-service -f docker/order-service/Dockerfile ."]
   ########## Test ######################################################################################################
-  test: go test ./...
+  test:
+    - go test -v -coverprofile cover.out ./...
+    - go tool cover -html=cover.out -o cover.html
   ########## Cleanup ###################################################################################################
   clean:protobuf: find api/proto -type f -name "*.pb.go" -delete
   clean:dist: rm -rf dist
