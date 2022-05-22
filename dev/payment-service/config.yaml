@@ -1,0 +1,4 @@
+mongo:
+  username: "payment"
+  password: "password"
+  database: "payment"
