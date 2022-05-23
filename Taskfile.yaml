@@ -28,6 +28,7 @@ tasks:
       - api/proto/**/*.proto
     generates:
       - api/proto/**/*.pb.go
+  vet: go vet ./...
   build:
     - task: api_gateway:build
     - task: stock_service:build

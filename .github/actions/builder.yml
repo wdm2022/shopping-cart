@@ -1,0 +1,13 @@
+name: 'Run in Docker builder'
+description: 'Runs the command in the custom Docker build'
+inputs:
+  command:
+    description: 'Command to execute'
+    required: true
+runs:
+  using: 'docker'
+  image: 'docker/Dockerfile'
+  args:
+    - "/bin/sh"
+    - "-c"
+    - ${{ inputs.command }}

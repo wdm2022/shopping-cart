@@ -1,0 +1,14 @@
+name: Verify
+
+on: push
+
+jobs:
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Lint
+        uses: ./.github/actions/builder
+        with:
+          command: task vet
