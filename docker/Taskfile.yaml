@@ -1,7 +1,7 @@
 version: '3'
 
 vars:
-  BUILDER_IMAGE: wdm-shoppingcart-builder
+  BUILDER_IMAGE: local.local/shopping-cart-builder:latest
 
 tasks:
   build_builder:

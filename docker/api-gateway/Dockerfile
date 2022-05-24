@@ -1,4 +1,4 @@
-FROM wdm-shoppingcart-builder AS builder
+FROM local.local/shopping-cart-builder:latest AS builder
 
 WORKDIR /project
 COPY . .

@@ -16,7 +16,7 @@ runs:
       with:
         context: .
         file: docker/Dockerfile
-        tags: wdm-shoppingcart-builder:latest
+        tags: local.local/shopping-cart-builder:latest
         load: true
         cache-from: type=gha
         cache-to: type=gha,mode=max
