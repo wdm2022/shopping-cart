@@ -1,6 +1,12 @@
 name: Build
 
-on: push
+on:
+  pull_request:
+    branches: [ master ]
+  push:
+    branches: [ master ]
+    # Publish semver tags as releases.
+    tags: [ 'v*.*.*' ]
 
 env:
   IMAGE_NAME: ghcr.io/${{ github.repository }}
@@ -14,6 +20,7 @@ jobs:
       - uses: docker/setup-buildx-action@v2
       - name: Login to image registry
         uses: docker/login-action@v2
+        if: github.event_name != 'pull_request'
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
@@ -21,7 +28,7 @@ jobs:
       - name: Build Docker image
         uses: ./.github/actions/builder_build
         with:
-          push: true
+          push: ${{ github.event_name != 'pull_request' }}
           target: api-gateway
           image-name: ${{ env.IMAGE_NAME }}/api-gateway
   build_order_service:
@@ -32,6 +39,7 @@ jobs:
       - uses: docker/setup-buildx-action@v2
       - name: Login to image registry
         uses: docker/login-action@v2
+        if: github.event_name != 'pull_request'
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
@@ -39,7 +47,7 @@ jobs:
       - name: Build Docker image
         uses: ./.github/actions/builder_build
         with:
-          push: true
+          push: ${{ github.event_name != 'pull_request' }}
           target: order-service
           image-name: ${{ env.IMAGE_NAME }}/order-service
   build_payment_service:
@@ -50,6 +58,7 @@ jobs:
       - uses: docker/setup-buildx-action@v2
       - name: Login to image registry
         uses: docker/login-action@v2
+        if: github.event_name != 'pull_request'
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
@@ -57,7 +66,7 @@ jobs:
       - name: Build Docker image
         uses: ./.github/actions/builder_build
         with:
-          push: true
+          push: ${{ github.event_name != 'pull_request' }}
           target: payment-service
           image-name: ${{ env.IMAGE_NAME }}/payment-service
   build_stock_service:
@@ -68,6 +77,7 @@ jobs:
       - uses: docker/setup-buildx-action@v2
       - name: Login to image registry
         uses: docker/login-action@v2
+        if: github.event_name != 'pull_request'
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
@@ -75,6 +85,6 @@ jobs:
       - name: Build Docker image
         uses: ./.github/actions/builder_build
         with:
-          push: true
+          push: ${{ github.event_name != 'pull_request' }}
           target: stock-service
           image-name: ${{ env.IMAGE_NAME }}/stock-service
