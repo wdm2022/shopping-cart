@@ -1,0 +1,37 @@
+name: "Build Docker image"
+description: "Builds and potentially pushes the application Docker image"
+
+inputs:
+  push:
+    description: "If true then push to the repository"
+    required: true
+  target:
+    description: "Target stage to build"
+    required: false
+    default: ""
+  image-name:
+    description: "Name of the image, without tag"
+    required: true
+
+runs:
+  using: "composite"
+  steps:
+    - name: Prepare Docker metadata
+      id: meta
+      uses: docker/metadata-action@98669ae865ea3cffbcbaa878cf57c20bbf1c6c38
+      with:
+        images: ${{ inputs.image-name }}
+        tags: |
+          type=semver,pattern={{version}}
+          type=semver,pattern={{major}}.{{minor}}
+          type=semver,pattern={{major}}
+          latest
+    - name: Build Docker image
+      uses: docker/build-push-action@v3
+      with:
+        tags: ${{ steps.meta.outputs.tags }}
+        labels: ${{ steps.meta.outputs.labels }}
+        push: ${{ inputs.push }}
+        target: ${{ inputs.target }}
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
