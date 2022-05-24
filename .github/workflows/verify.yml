@@ -3,8 +3,8 @@ name: Verify
 on: push
 
 jobs:
-  lint:
-    name: Lint
+  verify:
+    name: Verify
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -13,4 +13,10 @@ jobs:
       - name: Lint
         uses: ./.github/actions/builder_run
         with:
-          command: task prepare
+          command: task vet
+      - name: Format
+        uses: ./.github/actions/builder_run
+        with:
+          command: task fmt
+      - name: Verify format
+        run: git diff --exit-code

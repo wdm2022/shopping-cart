@@ -1,10 +1,16 @@
 name: "Build builder"
 description: "Builds the Docker builder image using GHA cache"
 
+outputs:
+  builder-name:
+    description: "Name of the buildx builder"
+    value: ${{ steps.setup-buildx.outputs.name }}
+
 runs:
   using: "composite"
   steps:
-    - uses: docker/setup-buildx-action@v2
+    - id: setup-buildx
+      uses: docker/setup-buildx-action@v2
     - name: Build builder
       uses: docker/build-push-action@v3
       with:

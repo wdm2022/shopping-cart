@@ -1,0 +1,46 @@
+name: "Build with builder"
+description: "Builds the builder and then the other image"
+
+inputs:
+  push:
+    description: "If true then push to the repository"
+    required: true
+  context:
+    description: "Build context path"
+    required: false
+    default: "."
+  dockerfile:
+    description: "Path to the Dockerfile"
+    required: false
+    default: "Dockerfile"
+  image-name:
+    description: "Name of the image, without tag"
+    required: true
+
+runs:
+  using: "composite"
+  steps:
+    - id: build-builder
+      name: Build builder
+      uses: ./.github/actions/builder
+    - name: Extract Docker metadata
+      id: meta
+      uses: docker/metadata-action@98669ae865ea3cffbcbaa878cf57c20bbf1c6c38
+      with:
+        images: ${{ inputs.image-name }}
+        tags: |
+          type=semver,pattern={{version}}
+          type=semver,pattern={{major}}.{{minor}}
+          type=semver,pattern={{major}}
+          latest
+    - name: Build Docker image
+      uses: docker/build-push-action@v3
+      with:
+        builder: ${{ steps.build-builder.outputs.builder-name }}
+        context: ${{ inputs.context }}
+        file: ${{ inputs.dockerfile }}
+        tags: ${{ steps.meta.outputs.tags }}
+        labels: ${{ steps.meta.outputs.labels }}
+        push: ${{ inputs.push }}
+        cache-from: type=gha
+        cache-to: type=gha,mode=max

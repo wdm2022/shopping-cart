@@ -31,6 +31,8 @@ tasks:
   vet:
     deps: [prepare]
     cmds: ["go vet ./..."]
+  fmt:
+    cmds: ["go fmt ./..."]
   build:
     - task: api_gateway:build
     - task: stock_service:build
