@@ -2,19 +2,15 @@ name: Verify
 
 on: push
 
-env:
-  BUILDER_IMAGE_NAME: wdm-shoppingcart-builder
-
 jobs:
   lint:
     name: Lint
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - uses: ./.github/actions/builder.yml
+      - name: Prepare builder
+        uses: ./.github/actions/builder
       - name: Lint
-        uses: addnab/docker-run-action@v3
+        uses: ./.github/actions/builder_run
         with:
-          image: ${{ env.BUILDER_IMAGE_NAME }}
-          options: -w /project -v ${{ github.workspace }}:/project
-          run: task prepare
+          command: task prepare
