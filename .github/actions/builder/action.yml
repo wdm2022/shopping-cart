@@ -4,8 +4,6 @@ description: "Builds the Docker builder image using BuildKit and GitHub Actions 
 runs:
   using: "composite"
   steps:
-    - name: Setup BuildKit
-      uses: docker/setup-buildx-action@v2
     - name: Build builder
       uses: docker/build-push-action@v3
       with:
