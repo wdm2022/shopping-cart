@@ -15,7 +15,7 @@ jobs:
         uses: ./.github/actions/builder_build
         with:
           push: true
-          dockerfile: docker/api-gateway/Dockerfile
+          target: api-gateway
           image-name: ${{ env.IMAGE_NAME }}/api-gateway
   build_order_service:
     name: Build order service
@@ -26,7 +26,7 @@ jobs:
         uses: ./.github/actions/builder_build
         with:
           push: true
-          dockerfile: docker/order-service/Dockerfile
+          target: order-service
           image-name: ${{ env.IMAGE_NAME }}/order-service
   build_payment_service:
     name: Build payment service
@@ -37,7 +37,7 @@ jobs:
         uses: ./.github/actions/builder_build
         with:
           push: true
-          dockerfile: docker/payment-service/Dockerfile
+          target: payment-service
           image-name: ${{ env.IMAGE_NAME }}/payment-service
   build_stock_service:
     name: Build stock service
@@ -48,5 +48,5 @@ jobs:
         uses: ./.github/actions/builder_build
         with:
           push: true
-          dockerfile: docker/stock-service/Dockerfile
+          target: stock-service
           image-name: ${{ env.IMAGE_NAME }}/stock-service

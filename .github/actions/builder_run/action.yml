@@ -11,6 +11,6 @@ runs:
   steps:
     - uses: addnab/docker-run-action@v3
       with:
-        image: local.local/shopping-cart-builder:latest
+        image: shopping-cart-builder:latest
         options: -w /project -v ${{ github.workspace }}:/project
         run: ${{ inputs.command }}

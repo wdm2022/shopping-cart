@@ -3,9 +3,14 @@ version: '3'
 output: prefixed
 
 includes:
-  docker: ./docker
   dev: ./dev
   dist: ./dist
+
+env:
+  # Enable buildkit for proper multistage Dockerfile builds
+  # (skipping stages, which are not needed for the target)
+  DOCKER_BUILDKIT: 1
+  BUILDER_IMAGE: shopping-cart-builder
 
 tasks:
   default:
@@ -50,9 +55,7 @@ tasks:
   api_gateway:build:
     deps: [prepare]
     cmds: ["go build -o out/ shopping-cart/cmd/api-gateway"]
-  api_gateway:build_docker:
-    deps: [docker:build_builder]
-    cmds: ["docker build -t wdm-shoppingcart/api-gateway -f docker/api-gateway/Dockerfile ."]
+  api_gateway:build_docker: docker build --target api-gateway -t shopping-cart/api-gateway .
   ########## Stock Service #############################################################################################
   stock_service:run:
     deps: [prepare]
@@ -60,9 +63,7 @@ tasks:
   stock_service:build:
     deps: [prepare]
     cmds: ["go build -o out/ shopping-cart/cmd/stock-service"]
-  stock_service:build_docker:
-    deps: [docker:build_builder]
-    cmds: ["docker build -t wdm-shoppingcart/stock-service -f docker/stock-service/Dockerfile ."]
+  stock_service:build_docker: docker build --target stock-service -t shopping-cart/stock-service .
   ########## Payment Service ###########################################################################################
   payment_service:run:
     deps: [prepare]
@@ -70,9 +71,7 @@ tasks:
   payment_service:build:
     deps: [prepare]
     cmds: ["go build -o out/ shopping-cart/cmd/payment-service"]
-  payment_service:build_docker:
-    deps: [docker:build_builder]
-    cmds: ["docker build -t wdm-shoppingcart/payment-service -f docker/payment-service/Dockerfile ."]
+  payment_service:build_docker: docker build --target payment-service -t shopping-cart/payment-service .
   ########## Order Service #############################################################################################
   order_service:run:
     deps: [prepare]
@@ -80,12 +79,31 @@ tasks:
   order_service:build:
     deps: [prepare]
     cmds: ["go build -o out/ shopping-cart/cmd/order-service"]
-  order_service:build_docker:
-    deps: [docker:build_builder]
-    cmds: ["docker build -t wdm-shoppingcart/order-service -f docker/order-service/Dockerfile ."]
+  order_service:build_docker: docker build --target order-service -t shopping-cart/order-service .
   ########## Cleanup ###################################################################################################
   clean:protobuf: find api/proto -type f -name "*.pb.go" -delete
   clean:
     - task: clean:protobuf
     - rm -rf out
     - rm -rf vendor
+  docker:build_builder: docker build --target builder -t {{.BUILDER_IMAGE}} .
+  docker:run:
+    deps: [docker:build_builder]
+    interactive: true
+    vars:
+      UID:
+        sh: id -u
+      GID:
+        sh: id -g
+      PWD:
+        sh: pwd
+    cmds:
+      - >
+        docker run -it
+        --network host
+        --user {{.UID}}:{{.GID}}
+        --workdir /project
+        --env GOCACHE=/tmp/gocache
+        --volume {{.PWD}}:/project
+        {{.BUILDER_IMAGE}}
+        {{.CLI_ARGS}}

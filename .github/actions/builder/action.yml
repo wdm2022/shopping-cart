@@ -1,22 +1,16 @@
 name: "Build builder"
-description: "Builds the Docker builder image using GHA cache"
-
-outputs:
-  builder-name:
-    description: "Name of the buildx builder"
-    value: ${{ steps.setup-buildx.outputs.name }}
+description: "Builds the Docker builder image using BuildKit and GitHub Actions cache"
 
 runs:
   using: "composite"
   steps:
-    - id: setup-buildx
+    - name: Setup BuildKit
       uses: docker/setup-buildx-action@v2
     - name: Build builder
       uses: docker/build-push-action@v3
       with:
-        context: .
-        file: docker/Dockerfile
-        tags: local.local/shopping-cart-builder:latest
+        target: builder
+        tags: shopping-cart-builder:latest
         load: true
         cache-from: type=gha
         cache-to: type=gha,mode=max

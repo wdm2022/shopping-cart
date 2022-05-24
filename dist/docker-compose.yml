@@ -4,15 +4,13 @@ services:
   api-gateway:
     restart: on-failure
     build:
-      context: .
-      dockerfile: docker/api-gateway/Dockerfile
+      target: api-gateway
     ports:
       - "127.0.0.1:8080:8080"
   order-service:
     restart: on-failure
     build:
-      context: .
-      dockerfile: docker/order-service/Dockerfile
+      target: order-service
     ports:
       - "127.0.0.1:50000:50000"
     environment:
@@ -23,8 +21,7 @@ services:
   payment-service:
     restart: on-failure
     build:
-      context: .
-      dockerfile: docker/payment-service/Dockerfile
+      target: payment-service
     ports:
       - "127.0.0.1:50001:50001"
     environment:
@@ -35,8 +32,7 @@ services:
   stock-service:
     restart: on-failure
     build:
-      context: .
-      dockerfile: docker/stock-service/Dockerfile
+      target: stock-service
     ports:
       - "127.0.0.1:50002:50002"
     environment:
