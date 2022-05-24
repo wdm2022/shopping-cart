@@ -9,6 +9,6 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - name: Lint
-        uses: ./.github/actions/builder
+        uses: ./
         with:
-          command: task vet
+          args: task vet

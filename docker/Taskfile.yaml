@@ -6,7 +6,7 @@ vars:
 tasks:
   build_builder:
     cmds:
-      - docker build -t {{.BUILDER_IMAGE}} -f docker/Dockerfile .
+      - docker build -t {{.BUILDER_IMAGE}} .
   run:
     deps: [build_builder]
     interactive: true
