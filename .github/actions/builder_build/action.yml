@@ -23,7 +23,7 @@ runs:
         images: ${{ inputs.image-name }}
         tags: |
           type=semver,pattern={{version}}
-          type=semver,pattern={{major}}.{{minor}}
+          type=semver,pattern={{major}}.{{minor}}${{ !startsWith(github.ref, 'refs/tags/v0.0.') }}
           type=semver,pattern={{major}},enable=${{ !startsWith(github.ref, 'refs/tags/v0.') }}
           latest
     - name: Build Docker image
