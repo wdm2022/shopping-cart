@@ -4,7 +4,38 @@ option go_package = "api/proto/stock";
 package stock;
 
 service Stock {
-  rpc Ping (PingRequest) returns (PingResponse) {}
+  rpc Ping (EmptyMessage) returns (PingResponse) {}
+  rpc Find (FindRequest) returns (FindResponse) {}
+  rpc Subtract (SubtractRequest) returns (EmptyMessage) {}
+  rpc Add (AddRequest) returns (EmptyMessage) {}
+  rpc Create (CreateRequest) returns (CreateResponse) {}
+}
+
+message FindRequest {
+  bytes itemId = 1;
+}
+
+message FindResponse {
+  uint32 stock = 1;
+  float price = 2;
+}
+
+message SubtractRequest {
+  bytes itemId = 1;
+  uint32 amount = 2;
+}
+
+message AddRequest {
+  bytes itemId = 1;
+  uint32 amount = 2;
+}
+
+message CreateRequest {
+  float price = 1;
+}
+
+message CreateResponse {
+  bytes itemId = 1;
 }
 
 message PingRequest {}
@@ -12,3 +43,4 @@ message PingResponse {
   string message = 1;
 }
 
+message EmptyMessage {}
