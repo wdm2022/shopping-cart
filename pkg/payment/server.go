@@ -20,7 +20,7 @@ type paymentServer struct {
 
 func (o paymentServer) Ping(ctx context.Context, in *paymentApi.PingRequest) (*paymentApi.PingResponse, error) {
 	fmt.Println("Received ping")
-	return &paymentApi.PingResponse{Message: "order"}, nil
+	return &paymentApi.PingResponse{Message: "payment"}, nil
 }
 
 func (o paymentServer) Pay(ctx context.Context, in *paymentApi.PayRequest) (*paymentApi.PayResponse, error) {
