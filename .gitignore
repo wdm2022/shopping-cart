@@ -5,3 +5,5 @@ out/
 vendor/
 
 *.pb.go
+*.out
+*.html
