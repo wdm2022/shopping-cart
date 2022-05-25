@@ -1,5 +1,8 @@
 # Shopping cart
 
+[![Build](https://github.com/wdm2022/shopping-cart/actions/workflows/build.yml/badge.svg)](https://github.com/wdm2022/shopping-cart/actions/workflows/build.yml)
+[![Verify](https://github.com/wdm2022/shopping-cart/actions/workflows/verify.yml/badge.svg)](https://github.com/wdm2022/shopping-cart/actions/workflows/verify.yml)
+
 Shopping cart microservice system with application-side distributed transactions.
 
 Project for Web-scale Data Management course at TU Delft (IN4331)
