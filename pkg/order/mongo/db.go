@@ -35,8 +35,12 @@ func Init(client *mongo.Client) *OrdersConnection {
 Deletes an order with a specific id
 @param id id in hex format without the '0x' prefix
 */
-func (orderConn *OrdersConnection) DeleteOrder(id []byte) error {
-	res, err := orderConn.OrderCollection.DeleteOne(context.Background(), bson.D{{OrderId, id}})
+func (orderConn *OrdersConnection) DeleteOrder(id string) error {
+	objId, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		return err
+	}
+	res, err := orderConn.OrderCollection.DeleteOne(context.Background(), bson.D{{OrderId, objId}})
 	if err != nil {
 		return err
 	}
@@ -50,38 +54,46 @@ func (orderConn *OrdersConnection) DeleteOrder(id []byte) error {
 Create a new empty order for the user
 The id is in hex format
 */
-func (orderConn *OrdersConnection) EmptyOrder(userId []byte) ([]byte, error) {
+func (orderConn *OrdersConnection) EmptyOrder(userId string) (string, error) {
+	objId, err := primitive.ObjectIDFromHex(userId)
+	if err != nil {
+		return "", err
+	}
 
 	order := Order{
 		OrderId:   primitive.NewObjectID(),
 		Paid:      false,
 		Items:     []primitive.ObjectID{},
-		UserId:    interface{}(userId).(primitive.ObjectID),
+		UserId:    objId,
 		TotalCost: 0,
 	}
 
 	res, err := orderConn.OrderCollection.InsertOne(context.Background(),
 		order)
 	if err != nil {
-		return []byte{}, err
+		return "", err
 	}
-	return interface{}(res.InsertedID).([]byte), nil
+	return res.InsertedID.(primitive.ObjectID).Hex(), nil
 }
 
 /*
 Find one order by id
 the id is in hex format
 */
-func (orderConn *OrdersConnection) FindOrder(id []byte) (*Order, error) {
+func (orderConn *OrdersConnection) FindOrder(id string) (*Order, error) {
+	objId, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		return nil, err
+	}
 
 	res := orderConn.OrderCollection.FindOne(context.Background(),
-		bson.D{{OrderId, id}})
+		bson.D{{OrderId, objId}})
 
 	if res.Err() != nil {
 		return nil, res.Err()
 	}
 	order := &Order{}
-	err := res.Decode(order)
+	err = res.Decode(order)
 	if err != nil {
 		return nil, err
 	}
@@ -92,11 +104,20 @@ func (orderConn *OrdersConnection) FindOrder(id []byte) (*Order, error) {
 Add an item to an order
 the ids are in hex format
 */
-func (orderConn *OrdersConnection) AddItem(orderId []byte, itemId []byte) error {
+func (orderConn *OrdersConnection) AddItem(orderId string, itemId string) error {
+	objOrderId, err := primitive.ObjectIDFromHex(orderId)
+	if err != nil {
+		return nil
+	}
 
-	push := bson.D{{"$push", bson.D{{Items, itemId}}}}
+	objItemId, err := primitive.ObjectIDFromHex(itemId)
+	if err != nil {
+		return nil
+	}
 
-	query := bson.D{{OrderId, orderId}}
+	push := bson.D{{"$push", bson.D{{Items, objItemId}}}}
+
+	query := bson.D{{OrderId, objOrderId}}
 
 	res, err := orderConn.OrderCollection.UpdateOne(context.Background(), query, push)
 
@@ -116,10 +137,20 @@ func (orderConn *OrdersConnection) AddItem(orderId []byte, itemId []byte) error 
 Remove an item from an order
 the ids are in hex format
 */
-func (orderConn *OrdersConnection) RemoveItem(orderId []byte, itemId []byte) error {
-	pull := bson.D{{"$pull", bson.D{{Items, itemId}}}}
+func (orderConn *OrdersConnection) RemoveItem(orderId string, itemId string) error {
+	objOrderId, err := primitive.ObjectIDFromHex(orderId)
+	if err != nil {
+		return nil
+	}
 
-	query := bson.D{{OrderId, orderId}}
+	objItemId, err := primitive.ObjectIDFromHex(itemId)
+	if err != nil {
+		return nil
+	}
+
+	pull := bson.D{{"$pull", bson.D{{Items, objItemId}}}}
+
+	query := bson.D{{OrderId, objOrderId}}
 
 	res, err := orderConn.OrderCollection.UpdateOne(context.Background(), query, pull)
 
