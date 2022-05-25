@@ -111,32 +111,32 @@ func RunGrpcServer(client *mongo.Client, port *int) error {
 }
 
 // *********************** Server methods **********************
-func PayOrder(conn *mongo2.OrdersConnection, id []byte, id2 []byte, amount float32) (bool, error) {
+func PayOrder(conn *mongo2.OrdersConnection, id string, id2 string, amount float32) (bool, error) {
 	// TODO
 	return true, nil
 }
 
-func CancelOrder(conn *mongo2.OrdersConnection, id []byte, id2 []byte) error {
+func CancelOrder(conn *mongo2.OrdersConnection, id string, id2 string) error {
 	// TODO
 	return nil
 }
 
-func StatusPayment(conn *mongo2.OrdersConnection, id []byte, id2 []byte) (bool, error) {
+func StatusPayment(conn *mongo2.OrdersConnection, id string, id2 string) (bool, error) {
 	// TODO
 	return true, nil
 }
 
-func AddFundsToUser(conn *mongo2.OrdersConnection, id []byte, amount float32) (bool, error) {
+func AddFundsToUser(conn *mongo2.OrdersConnection, id string, amount float32) (bool, error) {
 	// TODO
 	return true, nil
 }
 
-func CreateUser(conn *mongo2.OrdersConnection) ([]byte, error) {
+func CreateUser(conn *mongo2.OrdersConnection) (string, error) {
 	// TODO
-	return []byte{}, nil
+	return "Brownie", nil
 }
 
-func FindUser(conn *mongo2.OrdersConnection, id []byte) (float32, error) {
+func FindUser(conn *mongo2.OrdersConnection, id string) (float32, error) {
 	// TODO
 	return 0.0, nil
 }

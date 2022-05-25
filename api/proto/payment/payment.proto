@@ -15,8 +15,8 @@ service Payment {
 
 
 message PayRequest {
-  bytes userId = 1;
-  bytes orderId = 2;
+  string userId = 1;
+  string orderId = 2;
   float amount = 3;
 }
 message PayResponse {
@@ -24,20 +24,20 @@ message PayResponse {
 }
 
 message CancelRequest {
-  bytes userId = 1;
-  bytes orderId = 2;
+  string userId = 1;
+  string orderId = 2;
 }
 
 message StatusRequest {
-  bytes userId = 1;
-  bytes orderId = 2;
+  string userId = 1;
+  string orderId = 2;
 }
 message StatusResponse {
   bool paid = 1;
 }
 
 message AddFundsRequest {
-  bytes userId = 1;
+  string userId = 1;
   float amount = 2;
 }
 message AddFundsResponse {
@@ -45,15 +45,15 @@ message AddFundsResponse {
 }
 
 message CreateUserResponse {
-  bytes userId = 1;
+  string userId = 1;
 }
 
 
 message FindUserRequest {
-  bytes userId = 1;
+  string userId = 1;
 }
 message FindUserResponse {
-  bytes userId = 1;
+  string userId = 1;
   float credits = 2;
 }
 

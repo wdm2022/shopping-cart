@@ -88,22 +88,22 @@ func RunGrpcServer(client *mongo.Client, port *int) error {
 
 // *********************** Server methods **********************
 
-func CreateStock(conn *mongo2.OrdersConnection, price float32) ([]byte, error) {
+func CreateStock(conn *mongo2.OrdersConnection, price float32) (string, error) {
 	// TODO
-	return []byte{}, nil
+	return "Brownie", nil
 }
 
-func AddToStock(conn *mongo2.OrdersConnection, id []byte, amount uint32) error {
-	// TODO
-	return nil
-}
-
-func SubtractFromStock(conn *mongo2.OrdersConnection, id []byte, amount uint32) error {
+func AddToStock(conn *mongo2.OrdersConnection, id string, amount uint32) error {
 	// TODO
 	return nil
 }
 
-func FindStock(conn *mongo2.OrdersConnection, id []byte) (uint32, float32, error) {
+func SubtractFromStock(conn *mongo2.OrdersConnection, id string, amount uint32) error {
+	// TODO
+	return nil
+}
+
+func FindStock(conn *mongo2.OrdersConnection, id string) (uint32, float32, error) {
 	// TODO
 	return 0, 0.0, nil
 }

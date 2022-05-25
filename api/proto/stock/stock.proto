@@ -12,7 +12,7 @@ service Stock {
 }
 
 message FindRequest {
-  bytes itemId = 1;
+  string itemId = 1;
 }
 
 message FindResponse {
@@ -21,12 +21,12 @@ message FindResponse {
 }
 
 message SubtractRequest {
-  bytes itemId = 1;
+  string itemId = 1;
   uint32 amount = 2;
 }
 
 message AddRequest {
-  bytes itemId = 1;
+  string itemId = 1;
   uint32 amount = 2;
 }
 
@@ -35,7 +35,7 @@ message CreateRequest {
 }
 
 message CreateResponse {
-  bytes itemId = 1;
+  string itemId = 1;
 }
 
 message PingRequest {}
