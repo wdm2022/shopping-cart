@@ -113,17 +113,17 @@ func RunGrpcServer(client *mongo.Client, port *int) error {
 
 // *********************** Server methods **********************
 
-func createNewOrder(o *mongo2.OrdersConnection, userId []byte) ([]byte, error) {
+func createNewOrder(o *mongo2.OrdersConnection, userId string) (string, error) {
 	// TODO: Create a new order id for the given UserId. Add it to the DB and return the new order number
 
 	res, err := o.EmptyOrder(userId)
 	if err != nil {
-		return []byte{}, err
+		return "", err
 	}
 	return res, nil
 }
 
-func removeOrder(o *mongo2.OrdersConnection, orderId []byte) error {
+func removeOrder(o *mongo2.OrdersConnection, orderId string) error {
 	// TODO: Remove order from DB
 	err := o.DeleteOrder(orderId)
 	if err != nil {
@@ -132,12 +132,12 @@ func removeOrder(o *mongo2.OrdersConnection, orderId []byte) error {
 	return nil
 }
 
-func getOrder(orderId []byte) (orderDetails, error) {
+func getOrder(orderId string) (orderDetails, error) {
 	// TODO: Collect order details from database replace for holders
-	var userId []byte
+	var userId string = "Frodo"
 	var paid bool = false
 	var totalCost float32 = 0
-	var itemIds = [][]byte{{}}
+	var itemIds = []string{}
 
 	return orderDetails{
 		orderId:   orderId,
@@ -147,25 +147,25 @@ func getOrder(orderId []byte) (orderDetails, error) {
 		itemIds:   itemIds}, nil
 }
 
-func addItemToOrder(orderId []byte, itemId []byte) error {
+func addItemToOrder(orderId string, itemId string) error {
 	// TODO: Add item to order
 	return nil
 }
 
-func removeItemFromOrder(orderId []byte, itemId []byte) error {
+func removeItemFromOrder(orderId string, itemId string) error {
 	// TODO: Remove item from order
 	return nil
 }
 
-func checkoutOrder(id []byte) error {
+func checkoutOrder(id string) error {
 	// TODO: Checkout order
 	return nil
 }
 
 type orderDetails struct {
-	orderId   []byte
-	userId    []byte
+	orderId   string
+	userId    string
 	paid      bool
 	totalCost float32
-	itemIds   [][]byte
+	itemIds   []string
 }
