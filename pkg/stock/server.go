@@ -18,7 +18,7 @@ type stockServer struct {
 
 // **************** Interface methods *********************
 
-func (o stockServer) Ping(ctx context.Context, in *stockApi.PingRequest) (*stockApi.PingResponse, error) {
+func (o stockServer) Ping(ctx context.Context, in *stockApi.EmptyMessage) (*stockApi.PingResponse, error) {
 	fmt.Println("Received ping")
 	return &stockApi.PingResponse{Message: "Stock"}, nil
 }
