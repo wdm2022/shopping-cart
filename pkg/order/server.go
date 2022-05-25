@@ -49,9 +49,13 @@ func (o orderServer) RemoveOrder(ctx context.Context, in *orderApi.RemoveOrderRe
 func (o orderServer) GetOrder(ctx context.Context, in *orderApi.GetOrderRequest) (*orderApi.GetOrderResponse, error) {
 	fmt.Println("Received a get order detail request for order: ", in.OrderId)
 
-	var order, err = o.orderConn.FindOrder(in.OrderId)
+	order, err := o.orderConn.FindOrder(in.OrderId)
 
-	return &orderApi.GetOrderResponse{OrderId: order.OrderId,
+	if err != nil {
+		return &orderApi.GetOrderResponse{}, nil
+	}
+
+	return &orderApi.GetOrderResponse{OrderId: order.OrderId[:],
 		Paid:      order.Paid,
 		UserId:    order.UserId,
 		TotalCost: order.TotalCost,
