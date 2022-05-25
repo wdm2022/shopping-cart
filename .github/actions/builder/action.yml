@@ -1,0 +1,14 @@
+name: "Build builder"
+description: "Builds the Docker builder image using BuildKit and GitHub Actions cache"
+
+runs:
+  using: "composite"
+  steps:
+    - name: Build builder
+      uses: docker/build-push-action@v3
+      with:
+        target: builder
+        tags: shopping-cart-builder:latest
+        load: true
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
