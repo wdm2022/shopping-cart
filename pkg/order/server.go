@@ -54,7 +54,7 @@ func (o orderServer) GetOrder(ctx context.Context, in *orderApi.GetOrderRequest)
 	order, err := o.orderConn.FindOrder(in.OrderId)
 
 	if err != nil {
-		return &orderApi.GetOrderResponse{}, nil
+		return nil, err
 	}
 
 	return &orderApi.GetOrderResponse{OrderId: order.OrderId.Hex(),

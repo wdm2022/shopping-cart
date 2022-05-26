@@ -17,11 +17,12 @@ const (
 type OrdersConnection struct {
 	db.MongoConnection
 	OrderCollection *mongo.Collection
-	//add a context with timeout?
+	//ctx             context.Context
 }
 
 func Init(client *mongo.Client) *OrdersConnection {
 	database := client.Database(DbName)
+	//todo cancel fun
 	return &OrdersConnection{
 		MongoConnection: db.MongoConnection{
 			Database: database,
@@ -107,12 +108,12 @@ the ids are in hex format
 func (orderConn *OrdersConnection) AddItem(orderId string, itemId string) error {
 	objOrderId, err := primitive.ObjectIDFromHex(orderId)
 	if err != nil {
-		return nil
+		return err
 	}
 
 	objItemId, err := primitive.ObjectIDFromHex(itemId)
 	if err != nil {
-		return nil
+		return err
 	}
 
 	push := bson.D{{"$push", bson.D{{Items, objItemId}}}}
@@ -140,15 +141,16 @@ the ids are in hex format
 func (orderConn *OrdersConnection) RemoveItem(orderId string, itemId string) error {
 	objOrderId, err := primitive.ObjectIDFromHex(orderId)
 	if err != nil {
-		return nil
+		return err
 	}
 
 	objItemId, err := primitive.ObjectIDFromHex(itemId)
 	if err != nil {
-		return nil
+		return err
 	}
-
+	//todo, only remove one item of the same id
 	pull := bson.D{{"$pull", bson.D{{Items, objItemId}}}}
+	//pull := bson.D{{"$unset", bson.D{{"items.$[]", objItemId}}}}
 
 	query := bson.D{{OrderId, objOrderId}}
 
