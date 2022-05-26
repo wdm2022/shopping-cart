@@ -82,12 +82,8 @@ tasks:
   order_service:build_docker: docker build --target order-service -t shopping-cart/order-service .
   ########## Cleanup ###################################################################################################
   clean:protobuf: find api/proto -type f -name "*.pb.go" -delete
-  clean:containers: CONTAINERS="$(docker ps --format \'\{\{.Names\}\}\' | grep 'shoppingcart')"; CONTAINERS=${CONTAINERS//\'}; echo -e "Containers found :\n${CONTAINERS}"; if [[ -z "$CONTAINERS" ]]; then echo "No shopping cart containers were found"; else docker rm ${CONTAINERS}; fi
-  clean:images: IMGS="$(docker images --format \'\{\{.Tag\}\}\' | grep 'shoppingcart')"; IMGS=${IMGS//\'}; echo -e "Images found :\n${IMGS}"; if [[ -z "$IMGS" ]]; then echo "No shopping cart images were found"; else docker rmi -f $IMGS; fi
   clean:
     - task: clean:protobuf
-    - task: clean:containers
-    - task: clean:images
     - rm -rf out
     - rm -rf vendor
   ########## Docker Builder ###########################################################################################
