@@ -114,5 +114,7 @@ tasks:
         {{.CLI_ARGS}}
   ########## Test ######################################################################################################
   test:
-    - go test -v -coverprofile cover.out ./...
-    - go tool cover -html=cover.out -o cover.html
+    deps: [prepare]
+    cmds:
+      - go test -v -coverprofile cover.out ./...
+      - go tool cover -html=cover.out -o cover.html
