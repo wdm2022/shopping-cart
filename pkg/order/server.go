@@ -65,7 +65,10 @@ func (o orderServer) GetOrder(ctx context.Context, in *orderApi.GetOrderRequest)
 func (o orderServer) AddItem(ctx context.Context, in *orderApi.AddItemRequest) (*orderApi.EmptyMessage, error) {
 	fmt.Println("Received an add item: ", in.ItemId, " request for order: ", in.OrderId)
 
-	addItemToOrder(in.OrderId, in.ItemId)
+	var err = addItemToOrder(in.OrderId, in.ItemId)
+	if err != nil {
+		return nil, err
+	}
 
 	return &orderApi.EmptyMessage{}, nil
 }
@@ -73,7 +76,11 @@ func (o orderServer) AddItem(ctx context.Context, in *orderApi.AddItemRequest) (
 func (o orderServer) RemoveItem(ctx context.Context, in *orderApi.RemoveItemRequest) (*orderApi.EmptyMessage, error) {
 	fmt.Println("Received a remove item: ", in.ItemId, " request for order: ", in.OrderId)
 
-	removeItemFromOrder(in.OrderId, in.ItemId)
+	var err = removeItemFromOrder(in.OrderId, in.ItemId)
+
+	if err != nil {
+		return nil, err
+	}
 
 	return &orderApi.EmptyMessage{}, nil
 }
@@ -81,7 +88,10 @@ func (o orderServer) RemoveItem(ctx context.Context, in *orderApi.RemoveItemRequ
 func (o orderServer) Checkout(ctx context.Context, in *orderApi.CheckoutRequest) (*orderApi.EmptyMessage, error) {
 	fmt.Println("Received a checkout request for order: ", in.OrderId)
 
-	checkoutOrder(in.OrderId)
+	var err = checkoutOrder(in.OrderId)
+	if err != nil {
+		return nil, err
+	}
 
 	return &orderApi.EmptyMessage{}, nil
 }
@@ -103,17 +113,17 @@ func RunGrpcServer(client *mongo.Client, port *int) error {
 
 // *********************** Server methods **********************
 
-func createNewOrder(o *mongo2.OrdersConnection, userId []byte) ([]byte, error) {
+func createNewOrder(o *mongo2.OrdersConnection, userId string) (string, error) {
 	// TODO: Create a new order id for the given UserId. Add it to the DB and return the new order number
 
 	res, err := o.EmptyOrder(userId)
 	if err != nil {
-		return []byte{}, err
+		return "", err
 	}
 	return res, nil
 }
 
-func removeOrder(o *mongo2.OrdersConnection, orderId []byte) error {
+func removeOrder(o *mongo2.OrdersConnection, orderId string) error {
 	// TODO: Remove order from DB
 	err := o.DeleteOrder(orderId)
 	if err != nil {
@@ -122,37 +132,40 @@ func removeOrder(o *mongo2.OrdersConnection, orderId []byte) error {
 	return nil
 }
 
-func getOrder(orderId []byte) orderDetails {
-	//TODO: Collect order details from database replace for holders
-	var userId []byte
+func getOrder(orderId string) (orderDetails, error) {
+	// TODO: Collect order details from database replace for holders
+	var userId string = "Frodo"
 	var paid bool = false
 	var totalCost float32 = 0
-	var itemIds = [][]byte{{}}
+	var itemIds = []string{}
 
 	return orderDetails{
 		orderId:   orderId,
 		userId:    userId,
 		paid:      paid,
 		totalCost: totalCost,
-		itemIds:   itemIds}
+		itemIds:   itemIds}, nil
 }
 
-func addItemToOrder(orderId []byte, itemId []byte) {
+func addItemToOrder(orderId string, itemId string) error {
 	// TODO: Add item to order
+	return nil
 }
 
-func removeItemFromOrder(orderId []byte, itemId []byte) {
+func removeItemFromOrder(orderId string, itemId string) error {
 	// TODO: Remove item from order
+	return nil
 }
 
-func checkoutOrder(id []byte) {
+func checkoutOrder(id string) error {
 	// TODO: Checkout order
+	return nil
 }
 
 type orderDetails struct {
-	orderId   []byte
-	userId    []byte
+	orderId   string
+	userId    string
 	paid      bool
 	totalCost float32
-	itemIds   [][]byte
+	itemIds   []string
 }

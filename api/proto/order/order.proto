@@ -14,15 +14,15 @@ service Order {
 }
 
 message CreateOrderRequest {
-  bytes userId = 1;
+  string userId = 1;
 }
 
 message CreateOrderResponse {
-  bytes orderId = 1;
+  string orderId = 1;
 }
 
 message RemoveOrderRequest {
-  bytes orderId = 1;
+  string orderId = 1;
 }
 
 
@@ -31,21 +31,21 @@ message GetOrderRequest {
 }
 
 message GetOrderResponse {
-  bytes orderId = 1;
+  string orderId = 1;
   bool paid = 2;
-  bytes userId = 3;
+  string userId = 3;
   float totalCost = 4;
-  repeated bytes itemIds = 5;
+  repeated string itemIds = 5;
 }
 
 message AddItemRequest {
-  bytes orderId = 1;
-  bytes itemId = 2;
+  string orderId = 1;
+  string itemId = 2;
 }
 
 message RemoveItemRequest {
-  bytes orderId = 1;
-  bytes itemId = 2;
+  string orderId = 1;
+  string itemId = 2;
 }
 
 message CheckoutRequest {
