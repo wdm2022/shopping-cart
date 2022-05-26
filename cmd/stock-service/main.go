@@ -36,7 +36,7 @@ func main() {
 		_ = mongoClient.Disconnect(context.Background())
 	}()
 
-	if err := stock.RunGrpcServer(port); err != nil {
+	if err := stock.RunGrpcServer(&mongoClient, port); err != nil {
 		log.Fatalf("Failed to start gRPC server: %v", err)
 	}
 }

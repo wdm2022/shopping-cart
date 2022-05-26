@@ -162,8 +162,9 @@ func (orderConn *OrdersConnection) RemoveItem(orderId string, itemId string) err
 	if res.ModifiedCount > 1 {
 		return errors.New("updated multiple documents")
 	}
-	if res.ModifiedCount == 0 {
-		return errors.New("updated 0 documents")
-	}
+	//todo think about this, I guess we probably want to delete if it is there and not error when it isn't there
+	//if res.ModifiedCount == 0 {
+	//	return errors.New("updated 0 documents")
+	//}
 	return nil
 }

@@ -52,7 +52,7 @@ func (o *StockConnection) NewItem(price int64) (string, error) {
 
 }
 
-func (o *StockConnection) addStock(itemId string, amount int64) error {
+func (o *StockConnection) AddStock(itemId string, amount int64) error {
 
 	objId, err := primitive.ObjectIDFromHex(itemId)
 	if err != nil {
@@ -77,7 +77,7 @@ func (o *StockConnection) addStock(itemId string, amount int64) error {
 
 }
 
-func (o *StockConnection) SubtractStock(itemId string, amount int) error {
+func (o *StockConnection) SubtractStock(itemId string, amount int64) error {
 
 	objId, err := primitive.ObjectIDFromHex(itemId)
 	if err != nil {
@@ -102,7 +102,7 @@ func (o *StockConnection) SubtractStock(itemId string, amount int) error {
 
 }
 
-func (o *StockConnection) findStock(itemId string) (*Stock, error) {
+func (o *StockConnection) FindStock(itemId string) (*Stock, error) {
 
 	objId, err := primitive.ObjectIDFromHex(itemId)
 	if err != nil {
