@@ -27,14 +27,14 @@ message RemoveOrderRequest {
 
 
 message GetOrderRequest {
-  bytes orderId = 1;
+  string orderId = 1;
 }
 
 message GetOrderResponse {
   string orderId = 1;
   bool paid = 2;
   string userId = 3;
-  float totalCost = 4;
+  int64 totalCost = 4;
   repeated string itemIds = 5;
 }
 
@@ -49,7 +49,7 @@ message RemoveItemRequest {
 }
 
 message CheckoutRequest {
-  bytes orderId = 1;
+  string orderId = 1;
 }
 
 message PingResponse {

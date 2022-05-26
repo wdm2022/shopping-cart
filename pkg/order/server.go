@@ -3,6 +3,8 @@ package order
 import (
 	"context"
 	"fmt"
+	sf "github.com/sa-/slicefunk"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"google.golang.org/grpc"
 	"log"
@@ -26,13 +28,13 @@ func (o orderServer) Ping(ctx context.Context, in *orderApi.EmptyMessage) (*orde
 func (o orderServer) CreateOrder(ctx context.Context, in *orderApi.CreateOrderRequest) (*orderApi.CreateOrderResponse, error) {
 	fmt.Println("Received a new order request for user: ", in.UserId)
 
-	var newOrderId, err = createNewOrder(o.orderConn, in.UserId)
+	id, err := o.orderConn.EmptyOrder(in.UserId)
 
 	if err != nil {
 		return nil, err
 	}
 
-	return &orderApi.CreateOrderResponse{OrderId: newOrderId}, nil
+	return &orderApi.CreateOrderResponse{OrderId: id}, nil
 }
 
 func (o orderServer) RemoveOrder(ctx context.Context, in *orderApi.RemoveOrderRequest) (*orderApi.EmptyMessage, error) {
@@ -55,17 +57,19 @@ func (o orderServer) GetOrder(ctx context.Context, in *orderApi.GetOrderRequest)
 		return &orderApi.GetOrderResponse{}, nil
 	}
 
-	return &orderApi.GetOrderResponse{OrderId: order.OrderId[:],
+	return &orderApi.GetOrderResponse{OrderId: order.OrderId.Hex(),
 		Paid:      order.Paid,
-		UserId:    order.UserId,
+		UserId:    order.UserId.Hex(),
 		TotalCost: order.TotalCost,
-		ItemIds:   order.Items}, nil
+		ItemIds: sf.Map(order.Items, func(t primitive.ObjectID) string {
+			return t.Hex()
+		})}, nil
 }
 
 func (o orderServer) AddItem(ctx context.Context, in *orderApi.AddItemRequest) (*orderApi.EmptyMessage, error) {
 	fmt.Println("Received an add item: ", in.ItemId, " request for order: ", in.OrderId)
 
-	var err = addItemToOrder(in.OrderId, in.ItemId)
+	err := o.orderConn.AddItem(in.OrderId, in.ItemId)
 	if err != nil {
 		return nil, err
 	}
@@ -76,8 +80,7 @@ func (o orderServer) AddItem(ctx context.Context, in *orderApi.AddItemRequest) (
 func (o orderServer) RemoveItem(ctx context.Context, in *orderApi.RemoveItemRequest) (*orderApi.EmptyMessage, error) {
 	fmt.Println("Received a remove item: ", in.ItemId, " request for order: ", in.OrderId)
 
-	var err = removeItemFromOrder(in.OrderId, in.ItemId)
-
+	err := o.orderConn.RemoveItem(in.OrderId, in.ItemId)
 	if err != nil {
 		return nil, err
 	}
@@ -113,49 +116,49 @@ func RunGrpcServer(client *mongo.Client, port *int) error {
 
 // *********************** Server methods **********************
 
-func createNewOrder(o *mongo2.OrdersConnection, userId string) (string, error) {
-	// TODO: Create a new order id for the given UserId. Add it to the DB and return the new order number
-
-	res, err := o.EmptyOrder(userId)
-	if err != nil {
-		return "", err
-	}
-	return res, nil
-}
-
-func removeOrder(o *mongo2.OrdersConnection, orderId string) error {
-	// TODO: Remove order from DB
-	err := o.DeleteOrder(orderId)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-func getOrder(orderId string) (orderDetails, error) {
-	// TODO: Collect order details from database replace for holders
-	var userId string = "Frodo"
-	var paid bool = false
-	var totalCost float32 = 0
-	var itemIds = []string{}
-
-	return orderDetails{
-		orderId:   orderId,
-		userId:    userId,
-		paid:      paid,
-		totalCost: totalCost,
-		itemIds:   itemIds}, nil
-}
-
-func addItemToOrder(orderId string, itemId string) error {
-	// TODO: Add item to order
-	return nil
-}
-
-func removeItemFromOrder(orderId string, itemId string) error {
-	// TODO: Remove item from order
-	return nil
-}
+//func createNewOrder(o *mongo2.OrdersConnection, userId string) (string, error) {
+//	// TODO: Create a new order id for the given UserId. Add it to the DB and return the new order number
+//
+//	res, err := o.EmptyOrder(userId)
+//	if err != nil {
+//		return "", err
+//	}
+//	return res, nil
+//}
+//
+//func removeOrder(o *mongo2.OrdersConnection, orderId string) error {
+//	// TODO: Remove order from DB
+//	err := o.DeleteOrder(orderId)
+//	if err != nil {
+//		return err
+//	}
+//	return nil
+//}
+//
+//func getOrder(orderId string) (orderDetails, error) {
+//	// TODO: Collect order details from database replace for holders
+//	var userId string = "Frodo"
+//	var paid bool = false
+//	var totalCost float32 = 0
+//	var itemIds = []string{}
+//
+//	return orderDetails{
+//		orderId:   orderId,
+//		userId:    userId,
+//		paid:      paid,
+//		totalCost: totalCost,
+//		itemIds:   itemIds}, nil
+//}
+//
+//func addItemToOrder(orderId string, itemId string) error {
+//	// TODO: Add item to order
+//	return nil
+//}
+//
+//func removeItemFromOrder(orderId string, itemId string) error {
+//	// TODO: Remove item from order
+//	return nil
+//}
 
 func checkoutOrder(id string) error {
 	// TODO: Checkout order
