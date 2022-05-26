@@ -36,7 +36,7 @@ create and return id of created user
 */
 func (p *PaymentConnection) CreateUser() (string, error) {
 	user := User{
-		UserId: primitive.ObjectID{},
+		UserId: primitive.NewObjectID(),
 		Credit: 0,
 	}
 

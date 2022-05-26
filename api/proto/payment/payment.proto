@@ -17,7 +17,7 @@ service Payment {
 message PayRequest {
   string userId = 1;
   string orderId = 2;
-  float amount = 3;
+  int64 amount = 3;
 }
 message PayResponse {
   bool success =1;
@@ -38,7 +38,7 @@ message StatusResponse {
 
 message AddFundsRequest {
   string userId = 1;
-  float amount = 2;
+  int64 amount = 2;
 }
 message AddFundsResponse {
   bool success = 1;
@@ -54,7 +54,7 @@ message FindUserRequest {
 }
 message FindUserResponse {
   string userId = 1;
-  float credits = 2;
+  int64 credits = 2;
 }
 
 
