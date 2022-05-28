@@ -13,8 +13,8 @@ func bindOrdersApi(app *fiber.App) {
 
 	orders.Post("/create/:userId", handlers.CreateOrder)
 	orders.Delete("/create/remove/:orderId", handlers.DeleteOrder)
+	orders.Get("/create/find/:orderId", handlers.GetOrder)
 	// TODO: uncomment after implementing handlers
-	//orders.Get("/create/find/:orderId")
 	//orders.Get("/addItem/:orderId/:itemId")
 	//orders.Delete("/removeItem/:orderId/:itemId")
 	//orders.Post("/checkout/:orderId")
