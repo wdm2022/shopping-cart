@@ -12,8 +12,8 @@ func bindOrdersApi(app *fiber.App) {
 	orders := app.Group("/orders")
 
 	orders.Post("/create/:userId", handlers.CreateOrder)
+	orders.Delete("/create/remove/:orderId", handlers.DeleteOrder)
 	// TODO: uncomment after implementing handlers
-	//orders.Delete("/create/remove/:orderId")
 	//orders.Get("/create/find/:orderId")
 	//orders.Get("/addItem/:orderId/:itemId")
 	//orders.Delete("/removeItem/:orderId/:itemId")
