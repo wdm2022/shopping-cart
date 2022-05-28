@@ -67,5 +67,57 @@ func GetOrder(c *fiber.Ctx) error {
 	}
 	resp, err := client.Do(req)
 
-	return resp.StatusCode
+	return resp
+}
+
+func AddItem(c *fiber.Ctx) error {
+	client := &http.Client{}
+
+	orderId, err := c.ParamsInt("orderId")
+	if err != nil {
+		return err
+	}
+	itemId, err := c.ParamsInt("itemId")
+	if err != nil {
+		return err
+	}
+	values := map[string]int{"orderId": orderId, "itemId": itemId}
+	data, err := json.Marshal(values)
+	if err != nil {
+		return err
+	}
+
+	req, err := http.NewRequest("POST", "add-item", bytes.NewBuffer(data))
+	if err != nil {
+		return err
+	}
+	resp, err := client.Do(req)
+
+	return resp
+}
+
+func DeleteItem(c *fiber.Ctx) error {
+	client := &http.Client{}
+
+	orderId, err := c.ParamsInt("orderId")
+	if err != nil {
+		return err
+	}
+	itemId, err := c.ParamsInt("itemId")
+	if err != nil {
+		return err
+	}
+	values := map[string]int{"orderId": orderId, "itemId": itemId}
+	data, err := json.Marshal(values)
+	if err != nil {
+		return err
+	}
+
+	req, err := http.NewRequest("DELETE", "delete-item", bytes.NewBuffer(data))
+	if err != nil {
+		return err
+	}
+	resp, err := client.Do(req)
+
+	return resp
 }
