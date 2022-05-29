@@ -7,7 +7,7 @@ import (
 	"net/http"
 )
 
-func CreateOrder(c *fiber.Ctx) error {
+func CreateUser(c *fiber.Ctx) error {
 	userId, err := c.ParamsInt("userId")
 	if err != nil {
 		return err
@@ -23,29 +23,9 @@ func CreateOrder(c *fiber.Ctx) error {
 		return err
 	}
 
-	return resp.StatusCode
-}
-
-func DeleteOrder(c *fiber.Ctx) error {
-	client := &http.Client{}
-
-	userId, err := c.ParamsInt("userId")
-	if err != nil {
-		return err
-	}
-	values := map[string]int{"userId": userId}
-	data, err := json.Marshal(values)
-	if err != nil {
-		return err
-	}
-
-	req, err := http.NewRequest("DELETE", "delete-order", bytes.NewBuffer(data))
-	if err != nil {
-		return err
-	}
-	resp, err := client.Do(req)
-
-	return resp.StatusCode
+	return c.JSON(fiber.Map{
+		"resp": resp,
+	})
 }
 
 func GetOrder(c *fiber.Ctx) error {
@@ -67,7 +47,9 @@ func GetOrder(c *fiber.Ctx) error {
 	}
 	resp, err := client.Do(req)
 
-	return resp
+	return c.JSON(fiber.Map{
+		"resp": resp,
+	})
 }
 
 func AddItem(c *fiber.Ctx) error {
@@ -93,7 +75,9 @@ func AddItem(c *fiber.Ctx) error {
 	}
 	resp, err := client.Do(req)
 
-	return resp
+	return c.JSON(fiber.Map{
+		"resp": resp,
+	})
 }
 
 func DeleteItem(c *fiber.Ctx) error {
@@ -119,5 +103,52 @@ func DeleteItem(c *fiber.Ctx) error {
 	}
 	resp, err := client.Do(req)
 
-	return resp
+	return c.JSON(fiber.Map{
+		"resp": resp,
+	})
+}
+
+func DeleteOrder(c *fiber.Ctx) error {
+	client := &http.Client{}
+
+	userId, err := c.ParamsInt("userId")
+	if err != nil {
+		return err
+	}
+	values := map[string]int{"userId": userId}
+	data, err := json.Marshal(values)
+	if err != nil {
+		return err
+	}
+
+	req, err := http.NewRequest("DELETE", "delete-order", bytes.NewBuffer(data))
+	if err != nil {
+		return err
+	}
+	resp, err := client.Do(req)
+
+	return c.JSON(fiber.Map{
+		"resp": resp,
+	})
+}
+
+func CreateOrder(c *fiber.Ctx) error {
+	userId, err := c.ParamsInt("orderId")
+	if err != nil {
+		return err
+	}
+	values := map[string]int{"orderId": userId}
+	data, err := json.Marshal(values)
+	if err != nil {
+		return err
+	}
+
+	resp, err := http.Post("create-order", "order", bytes.NewBuffer(data))
+	if err != nil {
+		return err
+	}
+
+	return c.JSON(fiber.Map{
+		"resp": resp,
+	})
 }
