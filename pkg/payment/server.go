@@ -3,12 +3,13 @@ package payment
 import (
 	"context"
 	"fmt"
-	"go.mongodb.org/mongo-driver/mongo"
-	"google.golang.org/grpc"
 	"log"
 	"net"
 	paymentApi "shopping-cart/api/proto/payment"
 	mongo2 "shopping-cart/pkg/payment/mongo"
+
+	"go.mongodb.org/mongo-driver/mongo"
+	"google.golang.org/grpc"
 )
 
 type paymentServer struct {
@@ -26,19 +27,19 @@ func (o paymentServer) Ping(ctx context.Context, in *paymentApi.PingRequest) (*p
 func (o paymentServer) Pay(ctx context.Context, in *paymentApi.PayRequest) (*paymentApi.PayResponse, error) {
 	fmt.Println("Received a find payment request for user: ", in.UserId, ", order: ", in.OrderId, ", for an amount of: ", in.Amount)
 
-	var paymentSuccessful, err = PayOrder(o.paymentConn, in.UserId, in.OrderId, float32(in.Amount))
+	isPaid, err := o.paymentConn.PayOrder(in.UserId, in.OrderId, in.Amount)
 
 	if err != nil {
-		return nil, err
+		return &paymentApi.PayResponse{Success: isPaid}, err
 	}
 
-	return &paymentApi.PayResponse{Success: paymentSuccessful}, nil
+	return &paymentApi.PayResponse{Success: isPaid}, nil
 }
 
 func (o paymentServer) Cancel(ctx context.Context, in *paymentApi.CancelRequest) (*paymentApi.EmptyMessage, error) {
 	fmt.Println("Received a cancel payment request for user: ", in.UserId, ", order: ", in.OrderId)
 
-	var err = CancelOrder(o.paymentConn, in.UserId, in.OrderId)
+	err := o.paymentConn.CancelOrder(in.UserId, in.OrderId)
 
 	if err != nil {
 		return nil, err
@@ -50,7 +51,7 @@ func (o paymentServer) Cancel(ctx context.Context, in *paymentApi.CancelRequest)
 func (o paymentServer) Status(ctx context.Context, in *paymentApi.StatusRequest) (*paymentApi.StatusResponse, error) {
 	fmt.Println("Received a status payment request for user: ", in.UserId, ", order: ", in.OrderId)
 
-	var isPaid, err = StatusPayment(o.paymentConn, in.UserId, in.OrderId)
+	isPaid, err := o.paymentConn.StatusPayment(in.UserId, in.OrderId)
 
 	if err != nil {
 		return nil, err
@@ -108,20 +109,20 @@ func RunGrpcServer(client *mongo.Client, port *int) error {
 }
 
 // *********************** Server methods **********************
-func PayOrder(conn *mongo2.PaymentConnection, id string, id2 string, amount float32) (bool, error) {
-	// TODO
-	return true, nil
-}
+// func PayOrder(conn *mongo2.PaymentConnection, id string, id2 string, amount float32) (bool, error) {
+// 	// TODO
+// 	return true, nil
+// }
 
-func CancelOrder(conn *mongo2.PaymentConnection, id string, id2 string) error {
-	// TODO
-	return nil
-}
+// func CancelOrder(conn *mongo2.PaymentConnection, id string, id2 string) error {
+// 	// TODO
+// 	return nil
+// }
 
-func StatusPayment(conn *mongo2.PaymentConnection, id string, id2 string) (bool, error) {
-	// TODO
-	return true, nil
-}
+// func StatusPayment(conn *mongo2.PaymentConnection, id string, id2 string) (bool, error) {
+// 	// TODO
+// 	return true, nil
+// }
 
 //func AddFundsToUser(conn *mongo2.PaymentConnection, id string, amount float32) (bool, error) {
 //	// TODO
