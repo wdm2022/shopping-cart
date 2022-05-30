@@ -27,7 +27,7 @@ message RemoveOrderRequest {
 
 
 message GetOrderRequest {
-  bytes orderId = 1;
+  string orderId = 1;
 }
 
 message GetOrderResponse {

@@ -38,11 +38,6 @@ func (o orderServer) CreateOrder(ctx context.Context, in *orderApi.CreateOrderRe
 func (o orderServer) RemoveOrder(ctx context.Context, in *orderApi.RemoveOrderRequest) (*orderApi.EmptyMessage, error) {
 	fmt.Println("Received a remove order request for order: ", in.OrderId)
 
-	err := o.orderConn.DeleteOrder(in.OrderId)
-	if err != nil {
-		return nil, err
-	}
-
 	return &orderApi.EmptyMessage{}, nil
 }
 
@@ -65,33 +60,17 @@ func (o orderServer) GetOrder(ctx context.Context, in *orderApi.GetOrderRequest)
 func (o orderServer) AddItem(ctx context.Context, in *orderApi.AddItemRequest) (*orderApi.EmptyMessage, error) {
 	fmt.Println("Received an add item: ", in.ItemId, " request for order: ", in.OrderId)
 
-	var err = addItemToOrder(in.OrderId, in.ItemId)
-	if err != nil {
-		return nil, err
-	}
-
 	return &orderApi.EmptyMessage{}, nil
 }
 
 func (o orderServer) RemoveItem(ctx context.Context, in *orderApi.RemoveItemRequest) (*orderApi.EmptyMessage, error) {
 	fmt.Println("Received a remove item: ", in.ItemId, " request for order: ", in.OrderId)
 
-	var err = removeItemFromOrder(in.OrderId, in.ItemId)
-
-	if err != nil {
-		return nil, err
-	}
-
 	return &orderApi.EmptyMessage{}, nil
 }
 
 func (o orderServer) Checkout(ctx context.Context, in *orderApi.CheckoutRequest) (*orderApi.EmptyMessage, error) {
 	fmt.Println("Received a checkout request for order: ", in.OrderId)
-
-	var err = checkoutOrder(in.OrderId)
-	if err != nil {
-		return nil, err
-	}
 
 	return &orderApi.EmptyMessage{}, nil
 }
@@ -116,19 +95,12 @@ func RunGrpcServer(client *mongo.Client, port *int) error {
 func createNewOrder(o *mongo2.OrdersConnection, userId string) (string, error) {
 	// TODO: Create a new order id for the given UserId. Add it to the DB and return the new order number
 
-	res, err := o.EmptyOrder(userId)
-	if err != nil {
-		return "", err
-	}
-	return res, nil
+	return "", nil
 }
 
 func removeOrder(o *mongo2.OrdersConnection, orderId string) error {
 	// TODO: Remove order from DB
-	err := o.DeleteOrder(orderId)
-	if err != nil {
-		return err
-	}
+
 	return nil
 }
 
