@@ -3,10 +3,11 @@ package mongo
 import (
 	"context"
 	"errors"
+	"shopping-cart/pkg/db"
+
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
-	"shopping-cart/pkg/db"
 )
 
 const (
@@ -58,9 +59,24 @@ func (o *StockConnection) AddStock(itemId string, amount int64) error {
 	if err != nil {
 		return err
 	}
-	query := bson.D{{ItemId, objId}}
+	query := bson.D{
+		primitive.E{
+			Key:   ItemId,
+			Value: objId,
+		},
+	}
 
-	add := bson.D{{"$inc", bson.D{{StockAmount, amount}}}}
+	add := bson.D{
+		primitive.E{
+			Key: "$inc",
+			Value: bson.D{
+				primitive.E{
+					Key:   StockAmount,
+					Value: amount,
+				},
+			},
+		},
+	}
 
 	res, err := o.StockCollection.UpdateOne(context.Background(), query, add)
 
@@ -83,9 +99,24 @@ func (o *StockConnection) SubtractStock(itemId string, amount int64) error {
 	if err != nil {
 		return err
 	}
-	query := bson.D{{ItemId, objId}}
+	query := bson.D{
+		primitive.E{
+			Key:   ItemId,
+			Value: objId,
+		},
+	}
 
-	add := bson.D{{"$inc", bson.D{{StockAmount, 0 - (amount)}}}}
+	add := bson.D{
+		primitive.E{
+			Key: "$inc",
+			Value: bson.D{
+				primitive.E{
+					Key:   StockAmount,
+					Value: 0 - (amount),
+				},
+			},
+		},
+	}
 
 	res, err := o.StockCollection.UpdateOne(context.Background(), query, add)
 
@@ -108,7 +139,12 @@ func (o *StockConnection) FindStock(itemId string) (*Stock, error) {
 	if err != nil {
 		return nil, err
 	}
-	query := bson.D{{ItemId, objId}}
+	query := bson.D{
+		primitive.E{
+			Key:   ItemId,
+			Value: objId,
+		},
+	}
 
 	res := o.StockCollection.FindOne(context.Background(), query)
 

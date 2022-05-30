@@ -55,7 +55,13 @@ func (p *PaymentConnection) FindUser(userId string) (*User, error) {
 	}
 
 	res := p.PaymentCollection.FindOne(context.Background(),
-		bson.D{{UserId, objId}})
+		bson.D{
+			primitive.E{
+				Key:   UserId,
+				Value: objId,
+			},
+		},
+	)
 
 	if res.Err() != nil {
 		return nil, res.Err()
@@ -74,9 +80,19 @@ func (p *PaymentConnection) AddFunds(userId string, amount int64) error {
 		return nil
 	}
 
-	query := bson.D{{UserId, objId}}
+	query := bson.D{primitive.E{Key: UserId, Value: objId}}
 
-	add := bson.D{{"$inc", bson.D{{Credit, amount}}}}
+	add := bson.D{
+		primitive.E{
+			Key: "$inc",
+			Value: bson.D{
+				primitive.E{
+					Key:   Credit,
+					Value: amount,
+				},
+			},
+		},
+	}
 
 	res, err := p.PaymentCollection.UpdateOne(context.Background(), query, add)
 
@@ -98,7 +114,16 @@ func (p *PaymentConnection) PayOrder(userId string, orderId string, amount int64
 	if err != nil {
 		return false, err
 	}
-	query := bson.D{{UserId, objId}, {OrderId, orderId}}
+	query := bson.D{
+		primitive.E{
+			Key:   UserId,
+			Value: objId,
+		},
+		primitive.E{
+			Key:   OrderId,
+			Value: orderId,
+		},
+	}
 	res := p.PaymentCollection.FindOne(context.Background(), query)
 	if res.Err() != nil {
 		return false, res.Err()
@@ -112,7 +137,17 @@ func (p *PaymentConnection) PayOrder(userId string, orderId string, amount int64
 	if newAmount < 0 {
 		return false, errors.New("not sufficient credit")
 	}
-	decFunc := bson.D{{"$inc", bson.D{{Credit, -newAmount}}}}
+	decFunc := bson.D{
+		primitive.E{
+			Key: "$inc",
+			Value: bson.D{
+				primitive.E{
+					Key:   Credit,
+					Value: 0 - (amount),
+				},
+			},
+		},
+	}
 	updateRes, err := p.PaymentCollection.UpdateOne(context.Background(), query, decFunc)
 	if err != nil {
 		return false, err
@@ -131,7 +166,16 @@ func (p *PaymentConnection) CancelOrder(userId string, orderId string) error {
 	if err != nil {
 		return err
 	}
-	query := bson.D{{UserId, objId}, {OrderId, orderId}}
+	query := bson.D{
+		primitive.E{
+			Key:   UserId,
+			Value: objId,
+		},
+		primitive.E{
+			Key:   OrderId,
+			Value: orderId,
+		},
+	}
 	res, err := p.PaymentCollection.DeleteOne(context.Background(), query)
 	if err != nil {
 		return err
@@ -147,7 +191,16 @@ func (p *PaymentConnection) StatusPayment(userId string, orderId string) (bool, 
 	if err != nil {
 		return false, err
 	}
-	query := bson.D{{UserId, objId}, {OrderId, orderId}}
+	query := bson.D{
+		primitive.E{
+			Key:   UserId,
+			Value: objId,
+		},
+		primitive.E{
+			Key:   OrderId,
+			Value: orderId,
+		},
+	}
 	res := p.PaymentCollection.FindOne(context.Background(), query)
 	if res.Err() != nil {
 		return false, res.Err()

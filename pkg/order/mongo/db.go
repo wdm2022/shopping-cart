@@ -3,10 +3,11 @@ package mongo
 import (
 	"context"
 	"errors"
+	"shopping-cart/pkg/db"
+
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
-	"shopping-cart/pkg/db"
 )
 
 const (
@@ -41,7 +42,13 @@ func (orderConn *OrdersConnection) DeleteOrder(id string) error {
 	if err != nil {
 		return err
 	}
-	res, err := orderConn.OrderCollection.DeleteOne(context.Background(), bson.D{{OrderId, objId}})
+	query := bson.D{
+		primitive.E{
+			Key:   OrderId,
+			Value: objId,
+		},
+	}
+	res, err := orderConn.OrderCollection.DeleteOne(context.Background(), query)
 	if err != nil {
 		return err
 	}
@@ -86,9 +93,13 @@ func (orderConn *OrdersConnection) FindOrder(id string) (*Order, error) {
 	if err != nil {
 		return nil, err
 	}
-
-	res := orderConn.OrderCollection.FindOne(context.Background(),
-		bson.D{{OrderId, objId}})
+	query := bson.D{
+		primitive.E{
+			Key:   OrderId,
+			Value: objId,
+		},
+	}
+	res := orderConn.OrderCollection.FindOne(context.Background(), query)
 
 	if res.Err() != nil {
 		return nil, res.Err()
@@ -116,9 +127,24 @@ func (orderConn *OrdersConnection) AddItem(orderId string, itemId string) error 
 		return err
 	}
 
-	push := bson.D{{"$push", bson.D{{Items, objItemId}}}}
+	push := bson.D{
+		primitive.E{
+			Key: "$push",
+			Value: bson.D{
+				primitive.E{
+					Key:   Items,
+					Value: objItemId,
+				},
+			},
+		},
+	}
 
-	query := bson.D{{OrderId, objOrderId}}
+	query := bson.D{
+		primitive.E{
+			Key:   OrderId,
+			Value: objOrderId,
+		},
+	}
 
 	res, err := orderConn.OrderCollection.UpdateOne(context.Background(), query, push)
 
@@ -149,10 +175,25 @@ func (orderConn *OrdersConnection) RemoveItem(orderId string, itemId string) err
 		return err
 	}
 	//todo, only remove one item of the same id
-	pull := bson.D{{"$pull", bson.D{{Items, objItemId}}}}
+	pull := bson.D{
+		primitive.E{
+			Key: "$pull",
+			Value: bson.D{
+				primitive.E{
+					Key:   Items,
+					Value: objItemId,
+				},
+			},
+		},
+	}
 	//pull := bson.D{{"$unset", bson.D{{"items.$[]", objItemId}}}}
 
-	query := bson.D{{OrderId, objOrderId}}
+	query := bson.D{
+		primitive.E{
+			Key:   OrderId,
+			Value: objOrderId,
+		},
+	}
 
 	res, err := orderConn.OrderCollection.UpdateOne(context.Background(), query, pull)
 
