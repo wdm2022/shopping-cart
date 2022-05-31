@@ -10,7 +10,7 @@ services:
       MONGO_INITDB_ROOT_PASSWORD: LoFiBeats
     volumes:
       - "mongo-data:/data/db"
-      - "./dev/mongo/init.js:/docker-entrypoint-initdb.d/init.js"
+      - "./mongo/init.js:/docker-entrypoint-initdb.d/init.js"
 
 volumes:
   mongo-data: {}

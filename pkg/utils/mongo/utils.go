@@ -3,10 +3,11 @@ package mongo
 import (
 	"context"
 	"fmt"
-	mongoDriver "go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/mongo/options"
 	"log"
 	"time"
+
+	mongoDriver "go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 func Connect(config *Config) mongoDriver.Client {
