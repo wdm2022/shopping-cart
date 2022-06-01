@@ -6,3 +6,6 @@ vendor/
 
 *.pb.go
 cover.*
+
+*.out
+*.html

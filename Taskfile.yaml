@@ -86,6 +86,7 @@ tasks:
     - task: clean:protobuf
     - rm -rf out
     - rm -rf vendor
+  ########## Docker Builder ###########################################################################################
   docker:build_builder: docker build --target builder -t {{.BUILDER_IMAGE}} .
   docker:run:
     deps: [docker:build_builder]
@@ -107,3 +108,9 @@ tasks:
         --volume {{.PWD}}:/project
         {{.BUILDER_IMAGE}}
         {{.CLI_ARGS}}
+  ########## Test ######################################################################################################
+  test:
+    deps: [prepare]
+    cmds:
+      - go test -v -coverprofile cover.out ./...
+      - go tool cover -html=cover.out -o cover.html
