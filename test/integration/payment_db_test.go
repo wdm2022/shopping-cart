@@ -2,16 +2,17 @@ package integration
 
 import (
 	mongoPayment "shopping-cart/pkg/payment/mongo"
-	mongoUtils "shopping-cart/pkg/utils/mongo"
 	"testing"
+
+	mongoUtils "shopping-cart/pkg/utils/mongo"
 
 	"github.com/stretchr/testify/assert"
 )
 
 var (
-	mongoTestConfigPayment = mongoUtils.Config{
+	paymentConfig = mongoUtils.Config{
 		Host:     "localhost",
-		Port:     27017,
+		Port:     0,
 		Username: "root",
 		Password: "LoFiBeats",
 		Database: "payment",
@@ -19,8 +20,9 @@ var (
 )
 
 func TestCreateUser(t *testing.T) {
-	teardownSuite := setupSuite(t)
-	mongoClient := mongoPayment.Connect(&mongoTestConfigPayment)
+	port, teardownSuite := setupSuite(t)
+	paymentConfig.Port = port
+	mongoClient := mongoPayment.Connect(&paymentConfig)
 	defer teardownSuite(t, mongoClient)
 
 	paymentConn := mongoPayment.Init(&mongoClient)
@@ -31,8 +33,9 @@ func TestCreateUser(t *testing.T) {
 }
 
 func TestFindUser(t *testing.T) {
-	teardownSuite := setupSuite(t)
-	mongoClient := mongoPayment.Connect(&mongoTestConfigPayment)
+	port, teardownSuite := setupSuite(t)
+	paymentConfig.Port = port
+	mongoClient := mongoPayment.Connect(&paymentConfig)
 	defer teardownSuite(t, mongoClient)
 
 	paymentConn := mongoPayment.Init(&mongoClient)
@@ -47,8 +50,9 @@ func TestFindUser(t *testing.T) {
 }
 
 func TestAddCredit(t *testing.T) {
-	teardownSuite := setupSuite(t)
-	mongoClient := mongoPayment.Connect(&mongoTestConfigPayment)
+	port, teardownSuite := setupSuite(t)
+	paymentConfig.Port = port
+	mongoClient := mongoPayment.Connect(&paymentConfig)
 	defer teardownSuite(t, mongoClient)
 
 	paymentConn := mongoPayment.Init(&mongoClient)

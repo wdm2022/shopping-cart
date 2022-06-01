@@ -2,23 +2,28 @@ package integration
 
 import (
 	"context"
-	"fmt"
 	"os"
 	"path"
+	"strconv"
+	"strings"
 	"testing"
-	"time"
 
 	mongoDriver "go.mongodb.org/mongo-driver/mongo"
+
+	"github.com/docker/go-connections/nat"
 
 	tc "github.com/testcontainers/testcontainers-go"
 	"github.com/testcontainers/testcontainers-go/wait"
 )
 
 var (
-	ctx = context.Background()
+	ctx    = context.Background()
+	mongoC tc.Container
 )
 
-func setupSuite(tb testing.TB) func(tb testing.TB, client mongoDriver.Client) {
+const mongodbPort = 27017
+
+func setupSuite(tb testing.TB) (int, func(tb testing.TB, client mongoDriver.Client)) {
 	envVars := make(map[string]string)
 	envVars["MONGO_INITDB_ROOT_USERNAME"] = "LoFiBeats"
 	envVars["MONGO_INITDB_ROOT_PASSWORD"] = "LoFiBeats"
@@ -27,11 +32,11 @@ func setupSuite(tb testing.TB) func(tb testing.TB, client mongoDriver.Client) {
 	if err != nil {
 		panic(err)
 	}
-	fmt.Println(pathCwd)
 
+	exposedPort := strconv.Itoa(mongodbPort) + "/tcp"
 	req := tc.ContainerRequest{
 		Image:        "mongo:4.4",
-		ExposedPorts: []string{"27017/tcp"},
+		ExposedPorts: []string{exposedPort},
 		Env:          envVars,
 		WaitingFor:   wait.ForLog("Listening on"),
 		Mounts: tc.Mounts(
@@ -43,19 +48,24 @@ func setupSuite(tb testing.TB) func(tb testing.TB, client mongoDriver.Client) {
 		Started:          true,
 	})
 
-	time.Sleep(10 * time.Second)
+	if err != nil {
+		tb.Error(err)
+	}
+
+	portStr := nat.Port(strconv.Itoa(mongodbPort))
+	port, err := mongoC.MappedPort(ctx, portStr)
+
+	if err != nil {
+		tb.Error(err)
+	}
+	s := strings.Split(string(port), "/")
+	portNum, err := nat.ParsePort(s[0])
 
 	if err != nil {
 		tb.Error(err)
 	}
 
-	port, err := mongoC.MappedPort(ctx, "27017")
-	fmt.Println("Port NUMBER:", port)
-	if err != nil {
-		tb.Error(err)
-	}
-
-	return func(tb testing.TB, client mongoDriver.Client) {
+	return portNum, func(tb testing.TB, client mongoDriver.Client) {
 		mongoC.Terminate(ctx)
 	}
 }
