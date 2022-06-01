@@ -1,7 +1,8 @@
-package handlers
+package unit
 
 import (
 	"net/http/httptest"
+	handlers "shopping-cart/pkg/api/handlers"
 	"strconv"
 	"strings"
 	"testing"
@@ -28,7 +29,7 @@ func TestCreateOrderCorrect(t *testing.T) {
 		},
 	}
 	app := fiber.New()
-	app.Post("/create/:userId", CreateOrder)
+	app.Post("/create/:userId", handlers.CreateOrder)
 	for _, test := range tests {
 		request_str := strings.Join([]string{"/create/", strconv.Itoa(test.orderIndex)}, "")
 		req := httptest.NewRequest("POST", request_str, nil)
@@ -55,7 +56,7 @@ func TestCreateOrderFails(t *testing.T) {
 		},
 	}
 	app := fiber.New()
-	app.Post("/create/:userId", CreateOrder)
+	app.Post("/create/:userId", handlers.CreateOrder)
 	for _, test := range tests {
 		request_str := strings.Join([]string{"/create/", test.orderIdentifier}, "")
 		req := httptest.NewRequest("POST", request_str, nil)
