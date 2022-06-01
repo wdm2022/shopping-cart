@@ -5,9 +5,62 @@ package payment;
 
 service Payment {
   rpc Ping (PingRequest) returns (PingResponse) {}
+  rpc Pay (PayRequest) returns (PayResponse) {}
+  rpc Cancel (CancelRequest) returns (EmptyMessage) {}
+  rpc Status (StatusRequest) returns (StatusResponse) {}
+  rpc AddFunds (AddFundsRequest) returns (AddFundsResponse) {}
+  rpc CreateUser (EmptyMessage) returns (CreateUserResponse) {}
+  rpc FindUser (FindUserRequest) returns (FindUserResponse) {}
 }
+
+
+message PayRequest {
+  string userId = 1;
+  string orderId = 2;
+  int64 amount = 3;
+}
+message PayResponse {
+  bool success =1;
+}
+
+message CancelRequest {
+  string userId = 1;
+  string orderId = 2;
+}
+
+message StatusRequest {
+  string userId = 1;
+  string orderId = 2;
+}
+message StatusResponse {
+  bool paid = 1;
+}
+
+message AddFundsRequest {
+  string userId = 1;
+  int64 amount = 2;
+}
+message AddFundsResponse {
+  bool success = 1;
+}
+
+message CreateUserResponse {
+  string userId = 1;
+}
+
+
+message FindUserRequest {
+  string userId = 1;
+}
+message FindUserResponse {
+  string userId = 1;
+  int64 credits = 2;
+}
+
 
 message PingRequest {}
 message PingResponse {
   string message = 1;
 }
+message EmptyMessage {}
+

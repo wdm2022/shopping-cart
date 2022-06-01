@@ -4,11 +4,57 @@ option go_package = "api/proto/order";
 package order;
 
 service Order {
-  rpc Ping (PingRequest) returns (PingResponse) {}
+  rpc Ping (EmptyMessage) returns (PingResponse) {}
+  rpc CreateOrder (CreateOrderRequest) returns (CreateOrderResponse) {}
+  rpc RemoveOrder (RemoveOrderRequest) returns (EmptyMessage) {}
+  rpc GetOrder (GetOrderRequest) returns (GetOrderResponse) {}
+  rpc AddItem (AddItemRequest) returns (EmptyMessage) {}
+  rpc RemoveItem (RemoveItemRequest) returns (EmptyMessage) {}
+  rpc Checkout (CheckoutRequest) returns (EmptyMessage) {}
 }
 
-message PingRequest {
+message CreateOrderRequest {
+  string userId = 1;
 }
+
+message CreateOrderResponse {
+  string orderId = 1;
+}
+
+message RemoveOrderRequest {
+  string orderId = 1;
+}
+
+
+message GetOrderRequest {
+  string orderId = 1;
+}
+
+message GetOrderResponse {
+  string orderId = 1;
+  bool paid = 2;
+  string userId = 3;
+  int64 totalCost = 4;
+  repeated string itemIds = 5;
+}
+
+message AddItemRequest {
+  string orderId = 1;
+  string itemId = 2;
+}
+
+message RemoveItemRequest {
+  string orderId = 1;
+  string itemId = 2;
+}
+
+message CheckoutRequest {
+  string orderId = 1;
+}
+
 message PingResponse {
   string message = 1;
 }
+
+message EmptyMessage {}
+
