@@ -23,58 +23,43 @@ func Connect(address string) *grpc.ClientConn {
 	return conn
 }
 
-func CreateOrder(userId string) (*orderApi.CreateOrderResponse, error) {
-	ctx, cel := context.WithTimeout(context.Background(), time.Second*3)
-	defer cel()
-	dto := orderApi.CreateOrderRequest{
-		UserId: userId,
-	}
-	return client.CreateOrder(ctx, &dto)
+func createContext() (context.Context, context.CancelFunc) {
+	return context.WithTimeout(context.Background(), time.Second*10)
+
 }
 
-func RemoveOrder(orderId string) (*orderApi.EmptyMessage, error) {
-	ctx, cel := context.WithTimeout(context.Background(), time.Second*3)
+func CreateOrder(request *orderApi.CreateOrderRequest) (*orderApi.CreateOrderResponse, error) {
+	ctx, cel := createContext()
 	defer cel()
-	dto := orderApi.RemoveOrderRequest{
-		OrderId: orderId,
-	}
-	return client.RemoveOrder(ctx, &dto)
+	return client.CreateOrder(ctx, request)
 }
 
-func GetOrder(orderId string) (*orderApi.GetOrderResponse, error) {
-	ctx, cel := context.WithTimeout(context.Background(), time.Second*3)
+func RemoveOrder(request *orderApi.RemoveOrderRequest) (*orderApi.EmptyMessage, error) {
+	ctx, cel := createContext()
 	defer cel()
-	dto := orderApi.GetOrderRequest{
-		OrderId: orderId,
-	}
-	return client.GetOrder(ctx, &dto)
+	return client.RemoveOrder(ctx, request)
 }
 
-func AddItem(orderId string, itemId string) (*orderApi.EmptyMessage, error) {
-	ctx, cel := context.WithTimeout(context.Background(), time.Second*3)
+func GetOrder(request *orderApi.GetOrderRequest) (*orderApi.GetOrderResponse, error) {
+	ctx, cel := createContext()
 	defer cel()
-	dto := orderApi.AddItemRequest{
-		OrderId: orderId,
-		ItemId:  itemId,
-	}
-	return client.AddItem(ctx, &dto)
+	return client.GetOrder(ctx, request)
 }
 
-func RemoveItem(orderId string, itemId string) (*orderApi.EmptyMessage, error) {
-	ctx, cel := context.WithTimeout(context.Background(), time.Second*3)
+func AddItem(request *orderApi.AddItemRequest) (*orderApi.EmptyMessage, error) {
+	ctx, cel := createContext()
 	defer cel()
-	dto := orderApi.RemoveItemRequest{
-		OrderId: orderId,
-		ItemId:  itemId,
-	}
-	return client.RemoveItem(ctx, &dto)
+	return client.AddItem(ctx, request)
 }
 
-func Checkout(orderId string) (*orderApi.EmptyMessage, error) {
-	ctx, cel := context.WithTimeout(context.Background(), time.Second*3)
+func RemoveItem(request *orderApi.RemoveItemRequest) (*orderApi.EmptyMessage, error) {
+	ctx, cel := createContext()
 	defer cel()
-	dto := orderApi.CheckoutRequest{
-		OrderId: orderId,
-	}
-	return client.Checkout(ctx, &dto)
+	return client.RemoveItem(ctx, request)
+}
+
+func Checkout(request *orderApi.CheckoutRequest) (*orderApi.EmptyMessage, error) {
+	ctx, cel := createContext()
+	defer cel()
+	return client.Checkout(ctx, request)
 }
