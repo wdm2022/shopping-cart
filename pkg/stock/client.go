@@ -51,3 +51,21 @@ func Create(request *stockApi.CreateRequest) (*stockApi.CreateResponse, error) {
 	defer cel()
 	return client.Create(ctx, request)
 }
+
+func TotalCost(request *stockApi.TotalCostRequest) (*stockApi.TotalCostResponse, error) {
+	ctx, cel := createContext()
+	defer cel()
+	return client.TotalCost(ctx, request)
+}
+
+func AddBatch(request *stockApi.AddBatchRequest) (*stockApi.EmptyMessage, error) {
+	ctx, cel := createContext()
+	defer cel()
+	return client.AddBatch(ctx, request)
+}
+
+func SubtractBatch(request *stockApi.SubtractBatchRequest) (*stockApi.EmptyMessage, error) {
+	ctx, cel := createContext()
+	defer cel()
+	return client.SubtractBatch(ctx, request)
+}
