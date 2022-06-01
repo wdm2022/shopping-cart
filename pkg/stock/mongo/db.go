@@ -160,3 +160,19 @@ func (o *StockConnection) FindStock(itemId string) (*Stock, error) {
 	}
 	return stock, nil
 }
+
+func (o *StockConnection) CalculateTotalCost(itemIds []string) (int64, error) {
+	var totalCost int64 = 0
+	// TODO: Add DB call to calculate total with the provided list of items. #Rahim :)
+	return totalCost, nil
+}
+
+func (o *StockConnection) SubtractBatchStock(itemIds []string) error {
+	// TODO: Add DB call to remove the stock using the provided list of items. #Rahim :)
+	return nil
+}
+
+func (o *StockConnection) AddBatchStock(itemIds []string) error {
+	// TODO: Add DB call to add the stock using the provided list of items. #Rahim :)
+	return nil
+}
