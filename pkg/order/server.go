@@ -56,18 +56,21 @@ func (o orderServer) GetOrder(ctx context.Context, in *orderApi.GetOrderRequest)
 	fmt.Println("Received a get order detail request for order: ", in.OrderId)
 
 	order, err := o.orderConn.FindOrder(in.OrderId)
-
 	if err != nil {
 		return nil, err
 	}
 
+	itemList := sf.Map(order.Items, func(t primitive.ObjectID) string {
+		return t.Hex()
+	})
+
+	totalCost, _ := stock.TotalCost(&stockApi.TotalCostRequest{ItemIds: itemList})
 	return &orderApi.GetOrderResponse{OrderId: order.OrderId.Hex(),
 		Paid:      order.Paid,
 		UserId:    order.UserId.Hex(),
-		TotalCost: order.TotalCost,
-		ItemIds: sf.Map(order.Items, func(t primitive.ObjectID) string {
-			return t.Hex()
-		})}, nil
+		TotalCost: totalCost.TotalCost,
+		ItemIds:   itemList,
+	}, nil
 }
 
 func (o orderServer) AddItem(ctx context.Context, in *orderApi.AddItemRequest) (*orderApi.EmptyMessage, error) {

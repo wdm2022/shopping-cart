@@ -89,6 +89,7 @@ Find one order by id
 the id is in hex format
 */
 func (orderConn *OrdersConnection) FindOrder(id string) (*Order, error) {
+	// TODO: Remove totalcost from this table, is retrieved from the stock service #Rahim
 	objId, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
 		return nil, err
