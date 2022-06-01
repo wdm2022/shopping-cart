@@ -1,4 +1,4 @@
-## Local deployment
+# Local deployment
 
 To build and deploy the whole system locally, execute:
 
