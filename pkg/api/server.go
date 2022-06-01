@@ -11,35 +11,32 @@ import (
 func bindOrdersApi(app *fiber.App) {
 	orders := app.Group("/orders")
 
-	orders.Post("/create/:userId", handlers.CreateOrder)
-	// TODO: uncomment after implementing handlers
-	//orders.Delete("/create/remove/:orderId")
-	//orders.Get("/create/find/:orderId")
-	//orders.Get("/addItem/:orderId/:itemId")
-	//orders.Delete("/removeItem/:orderId/:itemId")
-	//orders.Post("/checkout/:orderId")
+	orders.Post("/create/:userId", handlers.CreateUser)
+	orders.Delete("/create/remove/:orderId", handlers.DeleteOrder)
+	orders.Get("/create/find/:orderId", handlers.GetOrder)
+	orders.Get("/addItem/:orderId/:itemId", handlers.AddItem)
+	orders.Delete("/removeItem/:orderId/:itemId", handlers.DeleteItem)
+	orders.Post("/checkout/:orderId", handlers.CreateOrder)
 }
 
 func bindStockApi(app *fiber.App) {
-	// TODO: uncomment after implementing handlers
-	//stock := app.Group("/stock")
+	stock := app.Group("/stock")
 
-	//stock.Get("/find/:itemId")
-	//stock.Post("/subtract/:itemId/:amount")
-	//stock.Post("/add/:itemId/:amount")
-	//stock.Post("/item/create/:price")
+	stock.Get("/find/:itemId", handlers.GetStock)
+	stock.Post("/subtract/:itemId/:amount", handlers.SubtractStock)
+	stock.Post("/add/:itemId/:amount", handlers.AddStock)
+	stock.Post("/item/create/:price", handlers.CreateItem)
 }
 
 func bindPaymentService(app *fiber.App) {
-	// TODO: uncomment after implementing handlers
-	//payment := app.Group("/payment")
+	payment := app.Group("/payment")
 
-	//payment.Post("/pay/:userId/:orderId/:amount")
-	//payment.Post("/cancel/:userId/:orderId")
-	//payment.Get("/status/:userId/:orderId")
-	//payment.Post("/add_funds/:userId/:amount")
-	//payment.Post("/create_user")
-	//payment.Get("/find_user/:user_id")
+	payment.Post("/pay/:userId/:orderId/:amount", handlers.PlaceOrderPayment)
+	payment.Post("/cancel/:userId/:orderId", handlers.CancelOrderPayment)
+	payment.Get("/status/:userId/:orderId", handlers.GetOrderPayment)
+	payment.Post("/add_funds/:userId/:amount", handlers.AddFunds)
+	payment.Post("/create_user", handlers.CreatePaymentUser)
+	payment.Get("/find_user/:user_id", handlers.GetUser)
 }
 
 func RunHttpServer(port *int, prefork *bool) error {
