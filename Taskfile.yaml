@@ -106,6 +106,7 @@ tasks:
         --workdir /project
         --env GOCACHE=/tmp/gocache
         --volume {{.PWD}}:/project
+        -v /var/run/docker.sock:/var/run/docker.sock
         {{.BUILDER_IMAGE}}
         {{.CLI_ARGS}}
   ########## Test ######################################################################################################

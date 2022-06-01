@@ -1,4 +1,5 @@
 # Run from the project's root as the working directory for Compose
+version: '3.8'
 
 services:
   mongo:
