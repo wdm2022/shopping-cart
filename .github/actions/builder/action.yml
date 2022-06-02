@@ -1,14 +1,37 @@
 name: "Build builder"
 description: "Builds the Docker builder image using BuildKit and GitHub Actions cache"
 
+inputs:
+  cache_key:
+    description: Key of the GitHub Actions cache
+    required: false
+    default: ${{ runner.os }}-${{ github.workflow }}-${{ github.job }}-${{ github.ref_name }}
+
 runs:
   using: "composite"
   steps:
+    - name: Prepare Docker layer cache
+      uses: actions/cache@v3
+      with:
+        path: /tmp/.buildx-cache
+        key: ${{ inputs.cache_key }}
+        restore-keys: |
+          ${{ inputs.cache_key }}
+          ${{ runner.os }}-${{ github.workflow }}-${{ github.job }}-
     - name: Build builder
       uses: docker/build-push-action@v3
       with:
         target: builder
         tags: shopping-cart-builder:latest
         load: true
-        cache-from: type=gha
-        cache-to: type=gha,mode=max
+        cache-from: type=local,src=/tmp/.buildx-cache
+        cache-to: type=local,dest=/tmp/.buildx-cache-new,mode=max
+    - name: Move cache
+      # Temp fix
+      # https://github.com/docker/build-push-action/issues/252
+      # https://github.com/moby/buildkit/issues/1896
+      # https://github.com/moby/buildkit/issues/2887
+      shell: bash
+      run: |
+        rm -rf /tmp/.buildx-cache
+        mv /tmp/.buildx-cache-new /tmp/.buildx-cache
