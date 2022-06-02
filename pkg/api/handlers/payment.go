@@ -137,7 +137,7 @@ func GetUser(c *fiber.Ctx) error {
 		return err
 	}
 	return c.JSON(fiber.Map{
-		"userId": response.UserId,
-		"credit": response.Credits,
+		"user_id": response.UserId,
+		"credit":  response.Credits,
 	})
 }

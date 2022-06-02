@@ -46,11 +46,11 @@ func GetOrder(c *fiber.Ctx) error {
 	}
 
 	return c.JSON(fiber.Map{
-		"orderId":   response.OrderId,
-		"paid":      response.Paid,
-		"items":     response.ItemIds,
-		"userId":    response.UserId,
-		"totalCost": response.TotalCost,
+		"order_id":   response.OrderId,
+		"paid":       response.Paid,
+		"items":      response.ItemIds,
+		"user_id":    response.UserId,
+		"total_cost": response.TotalCost,
 	})
 }
 
@@ -134,6 +134,6 @@ func CreateOrder(c *fiber.Ctx) error {
 		return err
 	}
 	return c.JSON(fiber.Map{
-		"orderId": response.OrderId,
+		"order_id": response.OrderId,
 	})
 }
