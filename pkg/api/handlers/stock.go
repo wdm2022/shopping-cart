@@ -91,6 +91,6 @@ func CreateItem(c *fiber.Ctx) error {
 		return err
 	}
 	return c.JSON(fiber.Map{
-		"itemId": response.ItemId,
+		"item_id": response.ItemId,
 	})
 }
