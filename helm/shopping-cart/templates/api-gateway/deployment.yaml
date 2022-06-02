@@ -33,6 +33,9 @@ spec:
             {{- toYaml .Values.apiGateway.securityContext | nindent 12 }}
           image: "{{ .Values.apiGateway.image.repository }}:{{ .Values.apiGateway.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.apiGateway.image.pullPolicy }}
+          volumeMounts:
+            - name: config
+              mountPath: /app/config
           ports:
             - name: http
               containerPort: 8080
@@ -59,3 +62,7 @@ spec:
       tolerations:
         {{- toYaml . | nindent 8 }}
       {{- end }}
+      volumes:
+        - name: config
+          configMap:
+            name: {{ include "shopping-cart.apiGateway.configMap" . }}

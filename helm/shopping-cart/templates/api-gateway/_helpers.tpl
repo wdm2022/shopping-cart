@@ -23,3 +23,10 @@ Create the name of the service account to use
 {{- default "default" .Values.apiGateway.serviceAccount.name }}
 {{- end }}
 {{- end }}
+
+{{/*
+ConfigMap name.
+*/}}
+{{- define "shopping-cart.apiGateway.configMap" -}}
+{{- printf "%s-config" (include "shopping-cart.apiGateway.fullname" .) | trunc 63 | trimSuffix "-" }}
+{{- end }}

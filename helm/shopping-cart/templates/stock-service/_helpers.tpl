@@ -23,3 +23,17 @@ Create the name of the service account to use
 {{- default "default" .Values.stockService.serviceAccount.name }}
 {{- end }}
 {{- end }}
+
+{{/*
+Address of the service endpoint.
+*/}}
+{{- define "shopping-cart.stockService.serviceAddress" -}}
+{{- printf "%s:%v" (include "shopping-cart.stockService.fullname" .) .Values.stockService.service.port }}
+{{- end }}
+
+{{/*
+ConfigMap name.
+*/}}
+{{- define "shopping-cart.stockService.configMap" -}}
+{{- printf "%s-config" (include "shopping-cart.stockService.fullname" .) | trunc 63 | trimSuffix "-" }}
+{{- end }}

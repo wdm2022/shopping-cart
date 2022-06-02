@@ -23,3 +23,17 @@ Create the name of the service account to use
 {{- default "default" .Values.paymentService.serviceAccount.name }}
 {{- end }}
 {{- end }}
+
+{{/*
+Address of the service endpoint.
+*/}}
+{{- define "shopping-cart.paymentService.serviceAddress" -}}
+{{- printf "%s:%v" (include "shopping-cart.paymentService.fullname" .) .Values.paymentService.service.port }}
+{{- end }}
+
+{{/*
+ConfigMap name.
+*/}}
+{{- define "shopping-cart.paymentService.configMap" -}}
+{{- printf "%s-config" (include "shopping-cart.paymentService.fullname" .) | trunc 63 | trimSuffix "-" }}
+{{- end }}
