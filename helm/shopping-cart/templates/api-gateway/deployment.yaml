@@ -28,7 +28,7 @@ spec:
       securityContext:
         {{- toYaml .Values.apiGateway.podSecurityContext | nindent 8 }}
       containers:
-        - name: {{ .Chart.Name }}
+        - name: api-gateway
           securityContext:
             {{- toYaml .Values.apiGateway.securityContext | nindent 12 }}
           image: "{{ .Values.apiGateway.image.repository }}:{{ .Values.apiGateway.image.tag | default .Chart.AppVersion }}"

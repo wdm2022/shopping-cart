@@ -1,0 +1,59 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "shopping-cart.paymentService.fullname" . }}
+  labels:
+    {{- include "shopping-cart.labels" . | nindent 4 }}
+spec:
+  {{- if not .Values.paymentService.autoscaling.enabled }}
+  replicas: {{ .Values.paymentService.replicaCount }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "shopping-cart.paymentService.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      {{- with .Values.paymentService.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "shopping-cart.paymentService.selectorLabels" . | nindent 8 }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "shopping-cart.paymentService.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.paymentService.podSecurityContext | nindent 8 }}
+      containers:
+        - name: payment-service
+          securityContext:
+            {{- toYaml .Values.paymentService.securityContext | nindent 12 }}
+          image: "{{ .Values.paymentService.image.repository }}:{{ .Values.paymentService.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.paymentService.image.pullPolicy }}
+          ports:
+            - name: grpc
+              containerPort: 50001
+              protocol: TCP
+          livenessProbe:
+            tcpSocket:
+              port: 50001
+          readinessProbe:
+            tcpSocket:
+              port: 50001
+          resources:
+            {{- toYaml .Values.paymentService.resources | nindent 12 }}
+      {{- with .Values.paymentService.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.paymentService.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.paymentService.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

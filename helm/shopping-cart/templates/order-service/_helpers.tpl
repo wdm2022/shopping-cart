@@ -1,0 +1,25 @@
+{{/*
+Expand the name of the component.
+*/}}
+{{- define "shopping-cart.orderService.fullname" -}}
+{{- printf "%s-order-service" (include "shopping-cart.fullname" .) | trunc 63 | trimSuffix "-" }}
+{{- end }}
+
+{{/*
+Selector labels
+*/}}
+{{- define "shopping-cart.orderService.selectorLabels" -}}
+{{ include "shopping-cart.selectorLabels" . }}
+shopping-cart/service: order
+{{- end }}
+
+{{/*
+Create the name of the service account to use
+*/}}
+{{- define "shopping-cart.orderService.serviceAccountName" -}}
+{{- if .Values.orderService.serviceAccount.create }}
+{{- default (include "shopping-cart.orderService.fullname" .) .Values.orderService.serviceAccount.name }}
+{{- else }}
+{{- default "default" .Values.orderService.serviceAccount.name }}
+{{- end }}
+{{- end }}
