@@ -1,0 +1,14 @@
+apiVersion: v1
+entries:
+  shopping-cart:
+  - apiVersion: v2
+    appVersion: 0.0.5
+    created: "2022-06-02T02:21:19.204230986Z"
+    description: Shopping cart system
+    digest: 7ea0748f1d8ba6fb3a1276ec46da80d61423ab8e48503462736d5515678736fe
+    name: shopping-cart
+    type: application
+    urls:
+    - https://github.com/wdm2022/shopping-cart/releases/download/v0.0.5/shopping-cart-0.0.5.tgz
+    version: 0.0.5
+generated: "2022-06-02T02:21:19.204236586Z"
