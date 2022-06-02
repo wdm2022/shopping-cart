@@ -28,7 +28,7 @@ func bindStockApi(app *fiber.App) {
 	stock.Post("/item/create/:price", handlers.CreateItem)
 }
 
-func bindPaymentService(app *fiber.App) {
+func bindPaymentApi(app *fiber.App) {
 	payment := app.Group("/payment")
 
 	payment.Post("/pay/:userId/:orderId/:amount", handlers.PlaceOrderPayment)
@@ -37,6 +37,13 @@ func bindPaymentService(app *fiber.App) {
 	payment.Post("/add_funds/:userId/:amount", handlers.AddFunds)
 	payment.Post("/create_user", handlers.CreatePaymentUser)
 	payment.Get("/find_user/:user_id", handlers.GetUser)
+}
+
+func bindKubernetesApi(app *fiber.App) {
+	kube := app.Group("/kube")
+
+	kube.Get("/liveness", handlers.Liveness)
+	kube.Get("/readiness", handlers.Readiness)
 }
 
 func RunHttpServer(port *int, prefork *bool) error {
@@ -50,7 +57,8 @@ func RunHttpServer(port *int, prefork *bool) error {
 
 	bindOrdersApi(app)
 	bindStockApi(app)
-	bindPaymentService(app)
+	bindPaymentApi(app)
+	bindKubernetesApi(app)
 
 	return app.Listen(fmt.Sprintf(":%d", *port))
 }

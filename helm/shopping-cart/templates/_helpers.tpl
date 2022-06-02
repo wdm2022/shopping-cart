@@ -49,14 +49,3 @@ Selector labels
 app.kubernetes.io/name: {{ include "shopping-cart.name" . }}
 app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end }}
-
-{{/*
-Create the name of the service account to use
-*/}}
-{{- define "shopping-cart.serviceAccountName" -}}
-{{- if .Values.serviceAccount.create }}
-{{- default (include "shopping-cart.fullname" .) .Values.serviceAccount.name }}
-{{- else }}
-{{- default "default" .Values.serviceAccount.name }}
-{{- end }}
-{{- end }}
