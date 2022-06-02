@@ -3,78 +3,110 @@ package handlers
 import (
 	"github.com/gofiber/fiber/v2"
 	"net/http"
+	paymentApi "shopping-cart/api/proto/payment"
+	"shopping-cart/pkg/payment"
 )
 
 func PlaceOrderPayment(c *fiber.Ctx) error {
+	userId := c.Params("userId")
+	// Invalid id / default value returned by c.params
+	if userId == "" {
+		return c.SendStatus(400)
+	}
+	orderId := c.Params("orderId")
+	// Invalid id / default value returned by c.params
+	if orderId == "" {
+		return c.SendStatus(400)
+	}
 
-	itemId, err := c.ParamsInt("userId")
-	if err != nil {
-		return err
-	}
-	orderId, err := c.ParamsInt("orderId")
-	if err != nil {
-		return err
-	}
 	amount, err := c.ParamsInt("amount")
 	if err != nil {
 		return err
 	}
 
-	return c.JSON(fiber.Map{
-		"userId":  itemId,
-		"orderId": orderId,
-		"amount":  amount,
-	})
+	_, err = payment.Pay(&paymentApi.PayRequest{UserId: userId, OrderId: orderId, Amount: int64(amount)})
+
+	if err != nil {
+		return c.SendStatus(400)
+	}
+
+	return c.SendStatus(200)
 }
 
 func CancelOrderPayment(c *fiber.Ctx) error {
 
-	itemId, err := c.ParamsInt("userId")
-	if err != nil {
-		return err
+	userId := c.Params("userId")
+	// Invalid id / default value returned by c.params
+	if userId == "" {
+		return c.SendStatus(400)
 	}
-	orderId, err := c.ParamsInt("orderId")
+	orderId := c.Params("orderId")
+	// Invalid id / default value returned by c.params
+	if orderId == "" {
+		return c.SendStatus(400)
+	}
+	_, err := payment.Cancel(&paymentApi.CancelRequest{UserId: userId, OrderId: orderId})
+
 	if err != nil {
-		return err
+		return c.SendStatus(400)
 	}
 
-	return c.JSON(fiber.Map{
-		"userId": itemId, "orderId": orderId,
-	})
+	return c.SendStatus(200)
 }
 
 func GetOrderPayment(c *fiber.Ctx) error {
+	userId := c.Params("userId")
+	// Invalid id / default value returned by c.params
+	if userId == "" {
+		return c.SendStatus(400)
+	}
+	orderId := c.Params("orderId")
+	// Invalid id / default value returned by c.params
+	if orderId == "" {
+		return c.SendStatus(400)
+	}
+	response, err := payment.Status(&paymentApi.StatusRequest{UserId: userId, OrderId: orderId})
 
-	itemId, err := c.ParamsInt("userId")
+	if err != nil {
+		return c.SendStatus(400)
+	}
+
+	err = c.SendStatus(200)
 	if err != nil {
 		return err
 	}
-	orderId, err := c.ParamsInt("orderId")
-	if err != nil {
-		return err
-	}
-
 	return c.JSON(fiber.Map{
-		"userId": itemId, "orderId": orderId,
+		"paid": response.Paid,
 	})
 }
 
 func AddFunds(c *fiber.Ctx) error {
-
-	itemId, err := c.ParamsInt("userId")
-	if err != nil {
-		return err
+	userId := c.Params("userId")
+	// Invalid id / default value returned by c.params
+	if userId == "" {
+		return c.SendStatus(400)
 	}
 	amount, err := c.ParamsInt("amount")
 	if err != nil {
 		return err
 	}
 
+	response, err := payment.AddFunds(&paymentApi.AddFundsRequest{UserId: userId, Amount: int64(amount)})
+
+	if err != nil {
+		return c.SendStatus(400)
+	}
+
+	err = c.SendStatus(200)
+	if err != nil {
+		return err
+	}
 	return c.JSON(fiber.Map{
-		"userId": itemId, "amount": amount,
+		"done": response.Success,
 	})
 }
 
+// TODO: which operation should this function call?
 func CreatePaymentUser(c *fiber.Ctx) error {
 	resp, err := http.Post("create-order", "order", nil)
 	if err != nil {
@@ -87,13 +119,25 @@ func CreatePaymentUser(c *fiber.Ctx) error {
 }
 
 func GetUser(c *fiber.Ctx) error {
+	userId := c.Params("userId")
 
-	itemId, err := c.ParamsInt("userId")
+	// Invalid id / default value returned by c.params
+	if userId == "" {
+		return c.SendStatus(400)
+	}
+
+	response, err := payment.FindUser(&paymentApi.FindUserRequest{UserId: userId})
+
+	if err != nil {
+		return c.SendStatus(400)
+	}
+
+	err = c.SendStatus(200)
 	if err != nil {
 		return err
 	}
-
 	return c.JSON(fiber.Map{
-		"userId": itemId,
+		"userId": response.UserId,
+		"credit": response.Credits,
 	})
 }
