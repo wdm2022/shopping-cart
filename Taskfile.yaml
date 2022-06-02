@@ -54,6 +54,8 @@ tasks:
     cmds: ["go run shopping-cart/cmd/api-gateway {{.CLI_ARGS}}"]
   api_gateway:build:
     deps: [prepare]
+    env:
+      CGO_ENABLED: 0
     cmds: ["go build -o out/ shopping-cart/cmd/api-gateway"]
   api_gateway:build_docker: docker build --target api-gateway -t shopping-cart/api-gateway .
   ########## Stock Service #############################################################################################
@@ -62,6 +64,8 @@ tasks:
     cmds: ["go run shopping-cart/cmd/stock-service {{.CLI_ARGS}}"]
   stock_service:build:
     deps: [prepare]
+    env:
+      CGO_ENABLED: 0
     cmds: ["go build -o out/ shopping-cart/cmd/stock-service"]
   stock_service:build_docker: docker build --target stock-service -t shopping-cart/stock-service .
   ########## Payment Service ###########################################################################################
@@ -70,6 +74,8 @@ tasks:
     cmds: ["go run shopping-cart/cmd/payment-service {{.CLI_ARGS}}"]
   payment_service:build:
     deps: [prepare]
+    env:
+      CGO_ENABLED: 0
     cmds: ["go build -o out/ shopping-cart/cmd/payment-service"]
   payment_service:build_docker: docker build --target payment-service -t shopping-cart/payment-service .
   ########## Order Service #############################################################################################
@@ -78,6 +84,8 @@ tasks:
     cmds: ["go run shopping-cart/cmd/order-service {{.CLI_ARGS}}"]
   order_service:build:
     deps: [prepare]
+    env:
+      CGO_ENABLED: 0
     cmds: ["go build -o out/ shopping-cart/cmd/order-service"]
   order_service:build_docker: docker build --target order-service -t shopping-cart/order-service .
   ########## Cleanup ###################################################################################################
