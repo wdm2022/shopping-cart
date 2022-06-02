@@ -2,6 +2,21 @@ name: "Build builder"
 description: "Builds the Docker builder image using BuildKit and GitHub Actions cache"
 
 inputs:
+  name:
+    description: Name of the builder image
+    required: true
+  context:
+    description: Path to the build context
+    required: false
+    default: "."
+  file:
+    description: Path to Dockerfile with the builder stage
+    required: false
+    default: "Dockerfile"
+  target:
+    description: Name of the target to build
+    required: false
+    default: builder
   cache_key:
     description: Key of the GitHub Actions cache
     required: false
@@ -21,8 +36,10 @@ runs:
     - name: Build builder
       uses: docker/build-push-action@v3
       with:
-        target: builder
-        tags: shopping-cart-builder:latest
+        file: ${{ inputs.file }}
+        context: ${{ inputs.context }}
+        target: ${{ inputs.target }}
+        tags: ${{ inputs.name }}
         load: true
         cache-from: type=local,src=/tmp/.buildx-cache
         cache-to: type=local,dest=/tmp/.buildx-cache-new,mode=max
