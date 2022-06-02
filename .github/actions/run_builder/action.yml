@@ -2,6 +2,9 @@ name: "Run in builder"
 description: "Runs the command in the builder container"
 
 inputs:
+  image:
+    description: "Name of the builder image"
+    required: true
   command:
     description: "Command to run inside the builder container"
     required: true
@@ -11,6 +14,6 @@ runs:
   steps:
     - uses: addnab/docker-run-action@v3
       with:
-        image: shopping-cart-builder:latest
+        image: ${{ inputs.image }}
         options: -w /project -v ${{ github.workspace }}:/project
         run: ${{ inputs.command }}

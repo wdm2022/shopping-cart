@@ -1,0 +1,54 @@
+name: Verify Go
+
+on:
+  pull_request:
+    branches: [ master ]
+  push:
+    tags-ignore: [ 'v*.*.*' ]
+    branches-ignore: [ 'gh-pages' ]
+    paths-ignore:
+      - 'helm/**'
+      - 'dev/**'
+      - 'dist/**'
+
+env:
+  BUILDER_NAME: shopping-cart/builder
+
+jobs:
+  lint-and-format:
+    name: Lint and format
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: docker/setup-buildx-action@v2
+      - name: Prepare builder
+        uses: ./.github/actions/build_builder
+        with:
+          name: ${{ env.BUILDER_NAME }}
+      - name: Lint
+        uses: ./.github/actions/run_builder
+        with:
+          image: ${{ env.BUILDER_NAME }}
+          command: task vet
+      - name: Format
+        uses: ./.github/actions/run_builder
+        with:
+          image: ${{ env.BUILDER_NAME }}
+          command: task fmt
+      - name: Verify format
+        run: git diff --exit-code
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: docker/setup-buildx-action@v2
+      - name: Prepare builder
+        uses: ./.github/actions/build_builder
+        with:
+          name: ${{ env.BUILDER_NAME }}
+      - name: Test
+        uses: ./.github/actions/run_builder
+        with:
+          image: ${{ env.BUILDER_NAME }}
+          command: task test

@@ -1,0 +1,66 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "shopping-cart.orderService.fullname" . }}
+  labels:
+    {{- include "shopping-cart.labels" . | nindent 4 }}
+spec:
+  {{- if not .Values.orderService.autoscaling.enabled }}
+  replicas: {{ .Values.orderService.replicaCount }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "shopping-cart.orderService.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      {{- with .Values.orderService.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "shopping-cart.orderService.selectorLabels" . | nindent 8 }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "shopping-cart.orderService.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.orderService.podSecurityContext | nindent 8 }}
+      containers:
+        - name: order-service
+          securityContext:
+            {{- toYaml .Values.orderService.securityContext | nindent 12 }}
+          image: "{{ .Values.orderService.image.repository }}:{{ .Values.orderService.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.orderService.image.pullPolicy }}
+          volumeMounts:
+            - name: config
+              mountPath: /app/config
+          ports:
+            - name: grpc
+              containerPort: 50000
+              protocol: TCP
+          livenessProbe:
+            tcpSocket:
+              port: 50000
+          readinessProbe:
+            tcpSocket:
+              port: 50000
+          resources:
+            {{- toYaml .Values.orderService.resources | nindent 12 }}
+      {{- with .Values.orderService.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.orderService.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.orderService.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      volumes:
+        - name: config
+          configMap:
+            name: {{ include "shopping-cart.orderService.configMap" . }}

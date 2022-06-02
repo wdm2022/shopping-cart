@@ -63,7 +63,8 @@ COPY --from=api-gateway-build /project/out/api-gateway .
 
 # Dumb init necessary to claim the PID 1 and allow Fiber to manage the process IDs
 # See: https://github.com/gofiber/fiber/issues/1036
-ENTRYPOINT ["/usr/bin/dumb-init", "--", "sh", "-c", "/app/api-gateway --prefork"]
+ENTRYPOINT ["/usr/bin/dumb-init", "--", "sh", "-c"]
+CMD ["/app/api-gateway --prefork --config-file=config/config.yaml"]
 
 FROM alpine:3.15 AS order-service
 EXPOSE 50000
@@ -72,6 +73,7 @@ WORKDIR /app
 COPY --from=order-service-build /project/out/order-service .
 
 ENTRYPOINT ["/app/order-service"]
+CMD ["--config-file=config/config.yaml"]
 
 FROM alpine:3.15 AS payment-service
 EXPOSE 50001
@@ -80,6 +82,7 @@ WORKDIR /app
 COPY --from=payment-service-build /project/out/payment-service .
 
 ENTRYPOINT ["/app/payment-service"]
+CMD ["--config-file=config/config.yaml"]
 
 FROM alpine:3.15 AS stock-service
 EXPOSE 50002
@@ -88,3 +91,4 @@ WORKDIR /app
 COPY --from=stock-service-build /project/out/stock-service .
 
 ENTRYPOINT ["/app/stock-service"]
+CMD ["--config-file=config/config.yaml"]

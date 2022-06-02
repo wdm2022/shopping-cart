@@ -1,0 +1,30 @@
+version: '3'
+
+vars:
+  HELM_BUILDER_IMAGE: shopping-cart/helm-builder
+  # Overridden by CI/CD pipeline
+  VERSION: '{{ .VERSION | default "1.0.0-DEV" }}'
+
+tasks:
+  lint: "helm lint shopping-cart"
+  package: "helm package shopping-cart --version {{.VERSION}} --app-version {{.VERSION}} -d charts"
+  build_builder: "docker build --target builder -t {{.HELM_BUILDER_IMAGE}} ."
+  docker_run:
+    deps: [ build_builder ]
+    interactive: true
+    vars:
+      UID:
+        sh: id -u
+      GID:
+        sh: id -g
+    cmds:
+      - >
+        docker run -it --rm
+        --network host
+        --user {{.UID}}:{{.GID}}
+        --workdir /project
+        --volume {{.PROJECT_ROOT}}:/project
+        {{.HELM_BUILDER_IMAGE}}
+        {{.CLI_ARGS}}
+  clean:
+    - rm -rf charts
