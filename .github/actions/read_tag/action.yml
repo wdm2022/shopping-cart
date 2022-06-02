@@ -1,0 +1,14 @@
+name: "Read tag"
+description: "Read the latest Git tag"
+
+outputs:
+  tag:
+    description: "Latest git tag (with semver-friendly suffix in case there was no tag with the current commit)"
+    value: ${{ steps.tag.outputs.tag }}
+
+runs:
+  using: composite
+  steps:
+    - id: tag
+      shell: bash
+      run: echo "::set-output name=tag::$(git describe --tags --always --first-parent | sed 's/v//')"
