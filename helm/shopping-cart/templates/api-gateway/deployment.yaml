@@ -1,0 +1,68 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "shopping-cart.apiGateway.fullname" . }}
+  labels:
+    {{- include "shopping-cart.labels" . | nindent 4 }}
+spec:
+  {{- if not .Values.apiGateway.autoscaling.enabled }}
+  replicas: {{ .Values.apiGateway.replicaCount }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "shopping-cart.apiGateway.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      {{- with .Values.apiGateway.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "shopping-cart.apiGateway.selectorLabels" . | nindent 8 }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "shopping-cart.apiGateway.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.apiGateway.podSecurityContext | nindent 8 }}
+      containers:
+        - name: api-gateway
+          securityContext:
+            {{- toYaml .Values.apiGateway.securityContext | nindent 12 }}
+          image: "{{ .Values.apiGateway.image.repository }}:{{ .Values.apiGateway.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.apiGateway.image.pullPolicy }}
+          volumeMounts:
+            - name: config
+              mountPath: /app/config
+          ports:
+            - name: http
+              containerPort: 8080
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /kube/liveness
+              port: http
+          readinessProbe:
+            httpGet:
+              path: /kube/readiness
+              port: http
+          resources:
+            {{- toYaml .Values.apiGateway.resources | nindent 12 }}
+      {{- with .Values.apiGateway.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.apiGateway.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.apiGateway.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      volumes:
+        - name: config
+          configMap:
+            name: {{ include "shopping-cart.apiGateway.configMap" . }}

@@ -5,12 +5,15 @@ output: prefixed
 includes:
   dev: ./dev
   dist: ./dist
+  helm:
+    dir: ./helm
+    taskfile: ./helm
 
 env:
   # Enable buildkit for proper multistage Dockerfile builds
   # (skipping stages, which are not needed for the target)
   DOCKER_BUILDKIT: 1
-  BUILDER_IMAGE: shopping-cart-builder
+  BUILDER_IMAGE: shopping-cart/builder
 
 tasks:
   default:

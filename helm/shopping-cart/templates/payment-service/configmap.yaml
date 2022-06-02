@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "shopping-cart.paymentService.configMap" . }}
+  labels:
+    {{- include "shopping-cart.labels" . | nindent 4 }}
+data:
+  config.yaml: |
+    stock-service:
+      address: {{ include "shopping-cart.stockService.serviceAddress" . }}
+    order-service:
+      address: {{ include "shopping-cart.orderService.serviceAddress" . }}
