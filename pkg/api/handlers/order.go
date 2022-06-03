@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"fmt"
 	"github.com/gofiber/fiber/v2"
 	orderApi "shopping-cart/api/proto/order"
 	"shopping-cart/pkg/order"
@@ -43,6 +44,12 @@ func GetOrder(c *fiber.Ctx) error {
 	err = c.SendStatus(200)
 	if err != nil {
 		return err
+	}
+
+	fmt.Println(response)
+	//grpc serializes / deserializes empty array as null/ nil or something
+	if response.ItemIds == nil {
+		response.ItemIds = []string{}
 	}
 
 	return c.JSON(fiber.Map{

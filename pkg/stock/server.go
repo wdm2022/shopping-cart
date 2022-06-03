@@ -75,6 +75,7 @@ func (o stockServer) TotalCost(ctx context.Context, in *stockApi.TotalCostReques
 	//TODO: Create a db call which returns the price for each item
 	totalCost, err := o.stockConn.CalculateTotalCost(in.ItemIds)
 	if err != nil {
+		fmt.Println("error when calculating total cost", err)
 		return nil, err
 	}
 

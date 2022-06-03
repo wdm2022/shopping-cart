@@ -4,12 +4,11 @@ import (
 	"context"
 	"errors"
 	sf "github.com/sa-/slicefunk"
-	"shopping-cart/pkg/db"
-	"shopping-cart/pkg/utils"
-
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
+	"shopping-cart/pkg/db"
+	"shopping-cart/pkg/utils"
 )
 
 const (
@@ -177,38 +176,53 @@ func (o *StockConnection) CalculateTotalCost(itemIds []string) (int64, error) {
 	ctx, cancelFunc := utils.ContextWithTimeOut()
 	defer cancelFunc()
 	aggregate, err := o.StockCollection.Aggregate(ctx, []bson.M{
-		bson.M{
+		{
 			"$match": bson.M{
 				ItemId: bson.M{
 					"$in": objIds,
 				},
 			},
 		},
-		bson.M{
+		{
 			"$group": bson.M{
 				"_id": nil,
 				"total": bson.M{
 					"$sum": "$price",
 				},
 			},
-		},
+		}, /*, {
+			"$project": bson.M{
+				"total": bson.M{
+					"$toString": "$total1",
+				},
+			},
+		},*/
 	})
 	if err != nil {
 		return 0, err
 	}
 
-	type costRes struct {
-		id    primitive.ObjectID `bson:"_id"`
-		total int64              `bson:"total"`
+	//idk mongo gives this format as a result : {"_id": null,"total": {"$numberLong":"1"}} if I don't convert to string
+
+	// screw this, just do it manually
+	//type costRes struct {
+	//	id    primitive.ObjectID `bson:"_id"`
+	//	total string             `bson:"total"`
+	//}
+
+	aggregate.Next(ctx)
+	totcalCost, ok := aggregate.Current.Index(1).Value().Int64OK()
+	if !ok {
+		return 0, errors.New("failed to convert to int")
 	}
-
-	totalStruct := &costRes{}
-
-	err = aggregate.Decode(totalStruct)
-	if err != nil {
+	if aggregate.Current == nil {
+		// no result
+		return 0, nil
+	} else if err != nil {
 		return 0, err
 	}
-	return totalStruct.total, nil
+
+	return totcalCost, nil
 }
 
 func (o *StockConnection) SubtractBatchStock(txId string, itemIds []string) error {

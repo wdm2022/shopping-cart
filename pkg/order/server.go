@@ -64,7 +64,11 @@ func (o orderServer) GetOrder(ctx context.Context, in *orderApi.GetOrderRequest)
 		return t.Hex()
 	})
 
-	totalCost, _ := stock.TotalCost(&stockApi.TotalCostRequest{ItemIds: itemList})
+	totalCost, err := stock.TotalCost(&stockApi.TotalCostRequest{ItemIds: itemList})
+	if err != nil {
+		fmt.Println("err when getting total cost", err)
+		return nil, err
+	}
 	return &orderApi.GetOrderResponse{OrderId: order.OrderId.Hex(),
 		Paid:      order.Paid,
 		UserId:    order.UserId.Hex(),
