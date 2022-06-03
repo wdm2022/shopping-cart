@@ -8,6 +8,12 @@ const (
 	Price       = "price"
 )
 
+type Log struct {
+	TxId   primitive.ObjectID `bson:"_id"`
+	status string             `bson:"status"`
+	//todo list of itemid and by how much they were subtracted
+}
+
 type Stock struct {
 	ItemId primitive.ObjectID `bson:"_id"`
 	Price  int64              `bson:"price"`

@@ -84,7 +84,7 @@ func (o stockServer) TotalCost(ctx context.Context, in *stockApi.TotalCostReques
 func (o stockServer) SubtractBatch(ctx context.Context, in *stockApi.SubtractBatchRequest) (*stockApi.EmptyMessage, error) {
 	fmt.Println("Received a total cost request for the following items: ", in.ItemIds)
 
-	err := o.stockConn.SubtractBatchStock(in.ItemIds)
+	err := o.stockConn.SubtractBatchStock(in.TxId, in.ItemIds)
 	if err != nil {
 		return nil, err
 	}
