@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"shopping-cart/pkg/db"
+	"shopping-cart/pkg/utils"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -11,13 +12,15 @@ import (
 )
 
 const (
-	DbName         = "payment"
-	CollectionName = "payments"
+	DbName                = "payment"
+	PaymentCollectionName = "payments"
+	LogCollectionName     = "logs"
 )
 
 type PaymentConnection struct {
 	db.MongoConnection
 	PaymentCollection *mongo.Collection
+	LogCollection     *mongo.Collection
 	//add a context with timeout?
 }
 
@@ -28,7 +31,8 @@ func Init(client *mongo.Client) *PaymentConnection {
 			Database: database,
 			Client:   client,
 		},
-		PaymentCollection: database.Collection(CollectionName),
+		PaymentCollection: database.Collection(PaymentCollectionName),
+		LogCollection:     database.Collection(LogCollectionName),
 	}
 }
 
@@ -109,56 +113,122 @@ func (p *PaymentConnection) AddFunds(userId string, amount int64) error {
 
 }
 
-func (p *PaymentConnection) PayOrder(userId string, orderId string, amount int64) (bool, error) {
-	objId, err := primitive.ObjectIDFromHex(orderId)
+func (p *PaymentConnection) PayOrder(txId string, userId string, orderId string, amount int64) (bool, error) {
+
+	objTxId, err := primitive.ObjectIDFromHex(txId)
 	if err != nil {
 		return false, err
 	}
-	query := bson.D{
-		primitive.E{
-			Key:   UserId,
-			Value: objId,
-		},
-		primitive.E{
-			Key:   OrderId,
-			Value: orderId,
-		},
-	}
-	res := p.PaymentCollection.FindOne(context.Background(), query)
-	if res.Err() != nil {
-		return false, res.Err()
-	}
-	user := &User{}
-	err = res.Decode(user)
+
+	objOrderId, err := primitive.ObjectIDFromHex(orderId)
 	if err != nil {
 		return false, err
 	}
-	newAmount := user.Credit - amount
-	if newAmount < 0 {
-		return false, errors.New("not sufficient credit")
+	objUserId, err := primitive.ObjectIDFromHex(orderId)
+	if err != nil {
+		return false, err
 	}
-	decFunc := bson.D{
-		primitive.E{
-			Key: "$inc",
-			Value: bson.D{
+
+	ctx, cancel := utils.ContextWithTimeOut()
+	defer cancel()
+
+	callBack := func(sessCtx mongo.SessionContext) (interface{}, error) {
+		// for if this is not used in a sage, but with the "endpoint"
+		emptyHex := primitive.ObjectID{}.Hex()
+		if txId != emptyHex {
+			logRes := p.LogCollection.FindOne(sessCtx, bson.D{{LogId, objTxId}})
+
+			if logRes.Err() == mongo.ErrNoDocuments {
+				// we have not handled this yet
+			} else if logRes.Err() != nil {
+				return false, logRes.Err()
+			} else {
+				//we have handled this
+				return true, nil
+			}
+		}
+
+		query := bson.D{
+			{
+				userId, objUserId,
+			},
+			{Orders, primitive.E{
+				"$not",
 				primitive.E{
-					Key:   Credit,
-					Value: 0 - (amount),
+					"$eq",
+					primitive.E{
+						OrderId,
+						objOrderId,
+					},
+				},
+			}},
+		}
+		res := p.PaymentCollection.FindOne(sessCtx, query)
+		if res.Err() != nil {
+			return false, res.Err()
+		}
+		user := &User{}
+		err = res.Decode(user)
+		if err != nil {
+			return false, err
+		}
+		newAmount := user.Credit - amount
+		if newAmount < 0 {
+			return false, errors.New("not sufficient credit")
+		}
+		decFunc := bson.D{
+			primitive.E{Key: "$push", Value: primitive.E{
+				Key:   Orders,
+				Value: objOrderId,
+			}},
+			primitive.E{
+				Key: "$inc",
+				Value: bson.D{
+					primitive.E{
+						Key:   Credit,
+						Value: 0 - (amount),
+					},
 				},
 			},
-		},
+		}
+
+		if txId != emptyHex {
+			_, err := p.LogCollection.InsertOne(sessCtx, Log{
+				TxId:    objTxId,
+				Status:  "done",
+				amount:  amount,
+				orderId: objOrderId,
+			})
+
+			if err != nil {
+				return false, err
+			}
+		}
+
+		updateRes, err := p.PaymentCollection.UpdateOne(sessCtx, query, decFunc)
+
+		//todo should we check for all of this?
+		if err != nil {
+			return false, err
+		}
+		if updateRes.ModifiedCount > 1 {
+			return false, errors.New("updated multiple documents")
+		}
+		if updateRes.ModifiedCount == 0 {
+			return false, errors.New("updated 0 documents")
+		}
+		return true, nil
 	}
-	updateRes, err := p.PaymentCollection.UpdateOne(context.Background(), query, decFunc)
+
+	session, err := p.Client.StartSession()
 	if err != nil {
 		return false, err
 	}
-	if updateRes.ModifiedCount > 1 {
-		return false, errors.New("updated multiple documents")
-	}
-	if updateRes.ModifiedCount == 0 {
-		return false, errors.New("updated 0 documents")
-	}
-	return true, nil
+	defer session.EndSession(ctx)
+
+	result, err := session.WithTransaction(ctx, callBack)
+
+	return result.(bool), err
 }
 
 func (p *PaymentConnection) CancelOrder(userId string, orderId string) error {
