@@ -3,7 +3,9 @@ package mongo
 import (
 	"context"
 	"errors"
+	sf "github.com/sa-/slicefunk"
 	"shopping-cart/pkg/db"
+	"shopping-cart/pkg/utils"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -162,13 +164,93 @@ func (o *StockConnection) FindStock(itemId string) (*Stock, error) {
 }
 
 func (o *StockConnection) CalculateTotalCost(itemIds []string) (int64, error) {
-	var totalCost int64 = 0
-	// TODO: Add DB call to calculate total with the provided list of items. #Rahim :)
-	return totalCost, nil
+	objIds := sf.Map(itemIds, func(t string) primitive.ObjectID {
+		id, err := primitive.ObjectIDFromHex(t)
+		if err != nil {
+			return [12]byte{}
+		}
+		return id
+	})
+	ctx, cancelFunc := utils.ContextWithTimeOut()
+	defer cancelFunc()
+	aggregate, err := o.StockCollection.Aggregate(ctx, []bson.M{
+		bson.M{
+			"$match": bson.M{
+				ItemId: bson.M{
+					"$in": objIds,
+				},
+			},
+		},
+		bson.M{
+			"$group": bson.M{
+				"_id": nil,
+				"total": bson.M{
+					"$sum": "$price",
+				},
+			},
+		},
+	})
+	if err != nil {
+		return 0, err
+	}
+
+	type costRes struct {
+		id    primitive.ObjectID `bson:"_id"`
+		total int64              `bson:"total"`
+	}
+
+	totalStruct := &costRes{}
+
+	err = aggregate.Decode(totalStruct)
+	if err != nil {
+		return 0, err
+	}
+	return totalStruct.total, nil
 }
 
 func (o *StockConnection) SubtractBatchStock(itemIds []string) error {
 	// TODO: Add DB call to remove the stock using the provided list of items. #Rahim :)
+
+	amounts := make(map[primitive.ObjectID]int64)
+	objIds := sf.Map(itemIds, func(t string) primitive.ObjectID {
+		objId, _ := primitive.ObjectIDFromHex(t)
+		amounts[objId] = amounts[objId] + 1
+		return objId
+	})
+	ctx, cancel := utils.ContextWithTimeOut()
+	defer cancel()
+	callback := func(sessCtx mongo.SessionContext) (interface{}, error) {
+		for _, id := range objIds {
+			query := bson.M{"_id": id}
+			add := bson.D{
+				primitive.E{
+					Key: "$inc",
+					Value: bson.D{
+						primitive.E{
+							Key:   StockAmount,
+							Value: 0 - amounts[id],
+						},
+					},
+				},
+			}
+
+			_, err := o.StockCollection.UpdateOne(sessCtx, query, add)
+			if err != nil {
+				return nil, err
+			}
+		}
+		return nil, nil
+	}
+	session, err := o.Client.StartSession()
+	if err != nil {
+		return err
+	}
+	defer session.EndSession(ctx)
+	_, err = session.WithTransaction(ctx, callback)
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
 
