@@ -101,6 +101,8 @@ func (o orderServer) Checkout(ctx context.Context, in *orderApi.CheckoutRequest)
 	//TODO - Implement the DB calls in the corresponding microservices. #Rahim :)
 
 	// TODO - Add checks which see if everything worked and add logic which maybe reserves the items for this order?
+	// use random as an txid
+	txId := primitive.NewObjectID().Hex()
 
 	// Get the order details from the db
 	order, orderErr := o.orderConn.FindOrder(in.OrderId)
@@ -119,7 +121,7 @@ func (o orderServer) Checkout(ctx context.Context, in *orderApi.CheckoutRequest)
 	}
 
 	// Process payment
-	_, payErr := payment.Pay(&paymentApi.PayRequest{UserId: userId, OrderId: in.OrderId, Amount: totalCost.TotalCost})
+	_, payErr := payment.Pay(&paymentApi.PayRequest{TxId: txId, UserId: userId, OrderId: in.OrderId, Amount: totalCost.TotalCost})
 	if payErr != nil {
 		return nil, payErr
 	}

@@ -26,8 +26,8 @@ func (o paymentServer) Ping(ctx context.Context, in *paymentApi.PingRequest) (*p
 
 func (o paymentServer) Pay(ctx context.Context, in *paymentApi.PayRequest) (*paymentApi.PayResponse, error) {
 	fmt.Println("Received a find payment request for user: ", in.UserId, ", order: ", in.OrderId, ", for an amount of: ", in.Amount)
-
-	isPaid, err := o.paymentConn.PayOrder(in.UserId, in.OrderId, in.Amount)
+	//if in.TxId is 0, we assume that this does not belong to a saga
+	isPaid, err := o.paymentConn.PayOrder(in.TxId, in.UserId, in.OrderId, in.Amount)
 
 	if err != nil {
 		return &paymentApi.PayResponse{Success: isPaid}, err
