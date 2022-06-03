@@ -11,10 +11,10 @@ import (
 func bindOrdersApi(app *fiber.App) {
 	orders := app.Group("/orders")
 
-	orders.Post("/create/:userId", handlers.CreateUser)
-	orders.Delete("/create/remove/:orderId", handlers.DeleteOrder)
-	orders.Get("/create/find/:orderId", handlers.GetOrder)
-	orders.Get("/addItem/:orderId/:itemId", handlers.AddItem)
+	orders.Post("/create/:userId", handlers.CreateOrder)
+	orders.Delete("/remove/:orderId", handlers.DeleteOrder)
+	orders.Get("/find/:orderId", handlers.GetOrder)
+	orders.Post("/addItem/:orderId/:itemId", handlers.AddItem)
 	orders.Delete("/removeItem/:orderId/:itemId", handlers.DeleteItem)
 	orders.Post("/checkout/:orderId", handlers.CreateOrder)
 }

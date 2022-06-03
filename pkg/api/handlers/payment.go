@@ -122,7 +122,7 @@ func CreatePaymentUser(c *fiber.Ctx) error {
 }
 
 func GetUser(c *fiber.Ctx) error {
-	userId := c.Params("userId")
+	userId := c.Params("user_id")
 
 	// Invalid id / default value returned by c.params
 	if userId == "" {
