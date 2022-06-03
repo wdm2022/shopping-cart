@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"github.com/gofiber/fiber/v2"
-	"net/http"
 	paymentApi "shopping-cart/api/proto/payment"
 	"shopping-cart/pkg/payment"
 )
@@ -108,13 +107,17 @@ func AddFunds(c *fiber.Ctx) error {
 
 // TODO: which operation should this function call?
 func CreatePaymentUser(c *fiber.Ctx) error {
-	resp, err := http.Post("create-order", "order", nil)
+	//resp, err := http.Post("create-order", "order", nil)
+	user, err := payment.CreateUser(&paymentApi.EmptyMessage{})
+	if err != nil {
+		return err
+	}
 	if err != nil {
 		return err
 	}
 
 	return c.JSON(fiber.Map{
-		"resp": resp,
+		"user_id": user.UserId,
 	})
 }
 

@@ -50,7 +50,8 @@ message TotalCostResponse {
 }
 
 message SubtractBatchRequest {
-  repeated string itemIds = 1;
+  string txId = 1;
+  repeated string itemIds = 2;
 }
 
 message AddBatchRequest {
