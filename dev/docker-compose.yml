@@ -6,13 +6,12 @@ services:
     ports:
       - "127.0.0.1:27017:27017"
     environment:
-      MONGODB_REPLICA_SET_MODE: primary
-      MONGODB_ROOT_PASSWORD: LoFiBeats
-      MONGODB_REPLICA_SET_KEY: LoFiBeats
-      MONGODB_ADVERTISED_HOSTNAME: localhost
-      MONGODB_INITIAL_PRIMARY_HOST: localhost
+      MONGODB_REPLICA_SET_MODE: "primary"
+      MONGODB_ROOT_PASSWORD: "LoFiBeats"
+      MONGODB_REPLICA_SET_KEY: "AsteriosWasRightMongoIsGarbage"
+      MONGODB_ADVERTISED_HOSTNAME: "mongo"
     volumes:
-      - "mongo-dev-data:/bitnami/mongodb"
+      - "mongo-data:/bitnami/mongodb"
       - "./dev/mongo/init.js:/docker-entrypoint-initdb.d/init.js"
 
 volumes:

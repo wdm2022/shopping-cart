@@ -2,12 +2,8 @@ version: '3'
 
 output: interleaved
 
-env:
-  COMPOSE_PROJECT_NAME: shopping-cart-dist
-  COMPOSE_FILE: dist/docker-compose.yml
-
 vars:
-  DIST_COMPOSE: "docker compose --project-directory ."
+  DIST_COMPOSE: "docker compose --project-directory . -f dev/docker-compose.yml -f dist/docker-compose.yml"
 
 tasks:
   compose: "{{.DIST_COMPOSE}} {{.CLI_ARGS}}"

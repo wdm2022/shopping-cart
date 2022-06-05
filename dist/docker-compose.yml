@@ -1,19 +1,6 @@
 # Run from the project's root as the working directory for Compose
 
 services:
-  mongo:
-    image: bitnami/mongodb:4.4
-    ports:
-      - "127.0.0.1:27017:27017"
-    environment:
-      MONGODB_REPLICA_SET_MODE: "primary"
-      MONGODB_ROOT_PASSWORD: "LoFiBeats"
-      MONGODB_REPLICA_SET_KEY: "LoFiBeats"
-      MONGODB_ADVERTISED_HOSTNAME: "mongo"
-      MONGODB_INITIAL_PRIMARY_HOST: "mongo"
-    volumes:
-      - "mongo-data:/bitnami/mongodb"
-      - "./dev/mongo/init.js:/docker-entrypoint-initdb.d/init.js"
   api-gateway:
     restart: on-failure
     build:
@@ -53,6 +40,3 @@ services:
       MONGO_USERNAME: "stock"
       MONGO_PASSWORD: "password"
       MONGO_DATABASE: "stock"
-
-volumes:
-  mongo-data: {}

@@ -23,6 +23,7 @@ func Connect(config *Config) mongoDriver.Client {
 	clientOptions := options.Client()
 	clientOptions.SetAuth(credential)
 	clientOptions.SetHosts(hosts)
+	clientOptions.SetDirect(config.DirectConnection)
 
 	client, err := mongoDriver.NewClient(clientOptions)
 	if err != nil {
