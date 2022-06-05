@@ -37,3 +37,10 @@ ConfigMap name.
 {{- define "shopping-cart.orderService.configMap" -}}
 {{- printf "%s-config" (include "shopping-cart.orderService.fullname" .) | trunc 63 | trimSuffix "-" }}
 {{- end }}
+
+{{/*
+Mongo host.
+*/}}
+{{- define "shopping-cart.orderService.mongoHost" -}}
+{{- printf "%s-mongodb-order-headless" (include "shopping-cart.fullname" .) | trunc 63 | trimSuffix "-" }}
+{{- end }}

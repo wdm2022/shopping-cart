@@ -197,3 +197,48 @@ stockService:
   nodeSelector: {}
   tolerations: []
   affinity: {}
+
+mongodb-order:
+  architecture: "replicaset"
+  replicaSetName: "orderReplicaSet"
+  replicaCount: 1
+  auth:
+    rootPassword: "LoFiBeats"
+    usernames:
+      - order
+    passwords:
+      - password
+    databases:
+      - order
+  metrics:
+    enabled: true
+
+mongodb-payment:
+  architecture: "replicaset"
+  replicaSetName: "paymentReplicaSet"
+  replicaCount: 1
+  auth:
+    rootPassword: "LoFiBeats"
+    usernames:
+      - payment
+    passwords:
+      - password
+    databases:
+      - payment
+  metrics:
+    enabled: true
+
+mongodb-stock:
+  architecture: "replicaset"
+  replicaSetName: "stockReplicaSet"
+  replicaCount: 1
+  auth:
+    rootPassword: "LoFiBeats"
+    usernames:
+      - stock
+    passwords:
+      - password
+    databases:
+      - stock
+  metrics:
+    enabled: true
