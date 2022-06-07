@@ -15,7 +15,7 @@ const (
 
 type Log struct {
 	TxId    primitive.ObjectID `bson:"_id"`
-	Status  string             `bson:"status"` // done, started
+	Status  string             `bson:"status"` // done, reverted
 	amount  int64              `bson:"amount"`
 	orderId primitive.ObjectID `bson:"order_id"`
 }

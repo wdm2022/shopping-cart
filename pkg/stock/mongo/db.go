@@ -254,6 +254,7 @@ func (o *StockConnection) SubtractBatchStock(txId string, itemIds []string) erro
 			return true, nil
 		}
 
+		//todo How do to all of this in one call to database.
 		for _, id := range objIds {
 			query := bson.M{"_id": id}
 			add := bson.D{
