@@ -147,18 +147,18 @@ func (p *PaymentConnection) PayOrder(txId string, userId string, orderId string,
 				return true, nil
 			}
 		}
-
+		// find user that doesn't have this order, so we haven't paid it yet
 		query := bson.D{
 			{
 				userId, objUserId,
 			},
-			{Orders, primitive.E{
-				"$not",
-				primitive.E{
-					"$eq",
-					primitive.E{
-						OrderId,
-						objOrderId,
+			{Key: Orders, Value: primitive.E{
+				Key: "$not",
+				Value: primitive.E{
+					Key: "$eq",
+					Value: primitive.E{
+						Key:   OrderId,
+						Value: objOrderId,
 					},
 				},
 			}},
