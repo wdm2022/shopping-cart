@@ -7,7 +7,8 @@ metadata:
 data:
   config.yaml: |
     mongo:
-      host: {{ include "shopping-cart.paymentService.mongoHost" . | quote }}
+      hosts:
+    {{- include "shopping-cart.paymentService.mongoHosts" . | nindent 8 }}
       username: {{ index (index .Values "mongodb-payment" "auth" "usernames") 0 | quote }}
       password: {{ index (index .Values "mongodb-payment" "auth" "passwords") 0 | quote }}
       database: {{ index (index .Values "mongodb-payment" "auth" "databases") 0 | quote }}

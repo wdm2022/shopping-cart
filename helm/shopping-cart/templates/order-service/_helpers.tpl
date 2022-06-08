@@ -39,8 +39,11 @@ ConfigMap name.
 {{- end }}
 
 {{/*
-Mongo host.
+Mongo hosts.
 */}}
-{{- define "shopping-cart.orderService.mongoHost" -}}
-{{- printf "%s-mongodb-order-headless" (include "shopping-cart.fullname" .) | trunc 63 | trimSuffix "-" }}
+{{- define "shopping-cart.orderService.mongoHosts" -}}
+{{- $fullname := include "shopping-cart.fullname" . }}
+{{- range until (index .Values "mongodb-order" "replicaCount" | int) }}
+- {{ printf "%s-mongodb-order-%v" $fullname . | quote }}
+{{- end }}
 {{- end }}

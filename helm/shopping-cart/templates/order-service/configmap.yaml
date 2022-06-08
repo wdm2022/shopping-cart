@@ -7,7 +7,8 @@ metadata:
 data:
   config.yaml: |
     mongo:
-      host: {{ include "shopping-cart.orderService.mongoHost" . | quote }}
+      hosts:
+    {{- include "shopping-cart.orderService.mongoHosts" . | nindent 8 }}
       username: {{ index (index .Values "mongodb-order" "auth" "usernames") 0 | quote }}
       password: {{ index (index .Values "mongodb-order" "auth" "passwords") 0 | quote }}
       database: {{ index (index .Values "mongodb-order" "auth" "databases") 0 | quote }}
