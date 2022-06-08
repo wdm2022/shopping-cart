@@ -2,3 +2,4 @@ mongo:
   username: "order"
   password: "password"
   database: "order"
+  directConnection: true

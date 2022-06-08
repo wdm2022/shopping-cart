@@ -9,9 +9,10 @@ on:
 
 env:
   IMAGE_NAME: ghcr.io/${{ github.repository }}
+  HELM_BUILDER_NAME: shopping-cart/helm-builder
 
 jobs:
-  build_api_gateway:
+  build-api-gateway:
     name: Build API gateway
     runs-on: ubuntu-latest
     steps:
@@ -25,12 +26,12 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
       - name: Build Docker image
-        uses: ./.github/actions/builder_build
+        uses: ./.github/actions/build
         with:
           push: ${{ github.event_name != 'pull_request' }}
           target: api-gateway
           image-name: ${{ env.IMAGE_NAME }}/api-gateway
-  build_order_service:
+  build-order-service:
     name: Build order service
     runs-on: ubuntu-latest
     steps:
@@ -44,12 +45,12 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
       - name: Build Docker image
-        uses: ./.github/actions/builder_build
+        uses: ./.github/actions/build
         with:
           push: ${{ github.event_name != 'pull_request' }}
           target: order-service
           image-name: ${{ env.IMAGE_NAME }}/order-service
-  build_payment_service:
+  build-payment-service:
     name: Build payment service
     runs-on: ubuntu-latest
     steps:
@@ -63,12 +64,12 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
       - name: Build Docker image
-        uses: ./.github/actions/builder_build
+        uses: ./.github/actions/build
         with:
           push: ${{ github.event_name != 'pull_request' }}
           target: payment-service
           image-name: ${{ env.IMAGE_NAME }}/payment-service
-  build_stock_service:
+  build-stock-service:
     name: Build stock service
     runs-on: ubuntu-latest
     steps:
@@ -82,8 +83,59 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
       - name: Build Docker image
-        uses: ./.github/actions/builder_build
+        uses: ./.github/actions/build
         with:
           push: ${{ github.event_name != 'pull_request' }}
           target: stock-service
           image-name: ${{ env.IMAGE_NAME }}/stock-service
+  helm:
+    name: Package and publish Helm Chart
+    runs-on: ubuntu-latest
+    if: github.event_name != 'pull_request'
+    needs:
+      - build-api-gateway
+      - build-order-service
+      - build-payment-service
+      - build-stock-service
+    env:
+      CR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      CR_OWNER: wdm2022
+      CR_GIT_REPO: shopping-cart
+      CR_PACKAGE_PATH: helm/charts
+      CR_RELEASE_NAME_TEMPLATE: "v{{ .Version }}"
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - uses: helm/chart-releaser-action@v1.4.0
+        with:
+          install_only: true
+      - uses: docker/setup-buildx-action@v2
+      - name: Configure Git
+        run: |
+          git config user.name "$GITHUB_ACTOR"
+          git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
+      - id: version
+        name: Determine version from tag
+        uses: ./.github/actions/read_tag
+      - name: Prepare builder
+        uses: ./.github/actions/build_builder
+        with:
+          file: helm/Dockerfile
+          name: ${{ env.HELM_BUILDER_NAME }}
+      - name: Download subcharts
+        uses: ./.github/actions/run_builder
+        with:
+          image: ${{ env.HELM_BUILDER_NAME }}
+          command: task helm:dependencies:update
+      - name: Package Helm Chart
+        uses: ./.github/actions/run_builder
+        with:
+          image: ${{ env.HELM_BUILDER_NAME }}
+          command: task helm:package VERSION=${{ steps.version.outputs.tag }}
+      - name: Upload release
+        run: cr upload
+        # Necessary until https://github.com/helm/chart-releaser/issues/187 is fixed
+      - run: mkdir .cr-index
+      - name: Update Helm repository index
+        run: cr index --push

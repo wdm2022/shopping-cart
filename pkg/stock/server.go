@@ -69,6 +69,41 @@ func (o stockServer) Create(ctx context.Context, in *stockApi.CreateRequest) (*s
 	return &stockApi.CreateResponse{ItemId: item}, nil
 }
 
+func (o stockServer) TotalCost(ctx context.Context, in *stockApi.TotalCostRequest) (*stockApi.TotalCostResponse, error) {
+	fmt.Println("Received a total cost request for the following items: ", in.ItemIds)
+
+	//TODO: Create a db call which returns the price for each item
+	totalCost, err := o.stockConn.CalculateTotalCost(in.ItemIds)
+	if err != nil {
+		fmt.Println("error when calculating total cost", err)
+		return nil, err
+	}
+
+	return &stockApi.TotalCostResponse{TotalCost: totalCost}, nil
+}
+
+func (o stockServer) SubtractBatch(ctx context.Context, in *stockApi.SubtractBatchRequest) (*stockApi.EmptyMessage, error) {
+	fmt.Println("Received a total cost request for the following items: ", in.ItemIds)
+
+	err := o.stockConn.SubtractBatchStock(in.TxId, in.ItemIds)
+	if err != nil {
+		return nil, err
+	}
+
+	return &stockApi.EmptyMessage{}, nil
+}
+
+func (o stockServer) AddBatch(ctx context.Context, in *stockApi.AddBatchRequest) (*stockApi.EmptyMessage, error) {
+	fmt.Println("Received a total cost request for the following items: ", in.ItemIds)
+
+	err := o.stockConn.AddBatchStock(in.ItemIds)
+	if err != nil {
+		return nil, err
+	}
+
+	return &stockApi.EmptyMessage{}, nil
+}
+
 func RunGrpcServer(client *mongo.Client, port *int) error {
 	lis, err := net.Listen("tcp", fmt.Sprintf(":%d", *port))
 	if err != nil {

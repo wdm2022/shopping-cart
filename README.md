@@ -1,7 +1,8 @@
 # Shopping cart
 
 [![Build](https://github.com/wdm2022/shopping-cart/actions/workflows/build.yml/badge.svg)](https://github.com/wdm2022/shopping-cart/actions/workflows/build.yml)
-[![Verify](https://github.com/wdm2022/shopping-cart/actions/workflows/verify.yml/badge.svg)](https://github.com/wdm2022/shopping-cart/actions/workflows/verify.yml)
+[![Verify Go](https://github.com/wdm2022/shopping-cart/actions/workflows/verify-go.yml/badge.svg)](https://github.com/wdm2022/shopping-cart/actions/workflows/verify-go.yml)
+[![Verify Helm](https://github.com/wdm2022/shopping-cart/actions/workflows/verify-helm.yml/badge.svg)](https://github.com/wdm2022/shopping-cart/actions/workflows/verify-helm.yml)
 
 Shopping cart microservice system with application-side distributed transactions.
 

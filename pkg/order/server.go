@@ -10,7 +10,11 @@ import (
 	"log"
 	"net"
 	orderApi "shopping-cart/api/proto/order"
+	paymentApi "shopping-cart/api/proto/payment"
+	stockApi "shopping-cart/api/proto/stock"
 	mongo2 "shopping-cart/pkg/order/mongo"
+	"shopping-cart/pkg/payment"
+	"shopping-cart/pkg/stock"
 )
 
 type orderServer struct {
@@ -52,18 +56,25 @@ func (o orderServer) GetOrder(ctx context.Context, in *orderApi.GetOrderRequest)
 	fmt.Println("Received a get order detail request for order: ", in.OrderId)
 
 	order, err := o.orderConn.FindOrder(in.OrderId)
-
 	if err != nil {
 		return nil, err
 	}
 
+	itemList := sf.Map(order.Items, func(t primitive.ObjectID) string {
+		return t.Hex()
+	})
+
+	totalCost, err := stock.TotalCost(&stockApi.TotalCostRequest{ItemIds: itemList})
+	if err != nil {
+		fmt.Println("err when getting total cost", err)
+		return nil, err
+	}
 	return &orderApi.GetOrderResponse{OrderId: order.OrderId.Hex(),
 		Paid:      order.Paid,
 		UserId:    order.UserId.Hex(),
-		TotalCost: order.TotalCost,
-		ItemIds: sf.Map(order.Items, func(t primitive.ObjectID) string {
-			return t.Hex()
-		})}, nil
+		TotalCost: totalCost.TotalCost,
+		ItemIds:   itemList,
+	}, nil
 }
 
 func (o orderServer) AddItem(ctx context.Context, in *orderApi.AddItemRequest) (*orderApi.EmptyMessage, error) {
@@ -91,11 +102,41 @@ func (o orderServer) RemoveItem(ctx context.Context, in *orderApi.RemoveItemRequ
 func (o orderServer) Checkout(ctx context.Context, in *orderApi.CheckoutRequest) (*orderApi.EmptyMessage, error) {
 	fmt.Println("Received a checkout request for order: ", in.OrderId)
 
-	var err = checkoutOrder(in.OrderId)
-	if err != nil {
-		return nil, err
+	//TODO - Implement the DB calls in the corresponding microservices. #Rahim :)
+
+	// TODO - Add checks which see if everything worked and add logic which maybe reserves the items for this order?
+	// use random as an txid
+	txId := primitive.NewObjectID().Hex()
+
+	// Get the order details from the db
+	order, orderErr := o.orderConn.FindOrder(in.OrderId)
+	userId := order.UserId.Hex()
+	itemIds := sf.Map(order.Items, func(t primitive.ObjectID) string {
+		return t.Hex()
+	})
+	if orderErr != nil {
+		return nil, orderErr
 	}
 
+	// Calculate the total cost of the order
+	totalCost, stockErr := stock.TotalCost(&stockApi.TotalCostRequest{ItemIds: itemIds})
+	if stockErr != nil {
+		return nil, stockErr
+	}
+
+	// Process payment
+	_, payErr := payment.Pay(&paymentApi.PayRequest{TxId: txId, UserId: userId, OrderId: in.OrderId, Amount: totalCost.TotalCost})
+	if payErr != nil {
+		return nil, payErr
+	}
+
+	// Remove items in the order from stock
+	_, stockErr2 := stock.SubtractBatch(&stockApi.SubtractBatchRequest{TxId: txId, ItemIds: itemIds})
+	if payErr != nil {
+		return nil, stockErr2
+	}
+
+	// TODO: add succes/fail error messages on return
 	return &orderApi.EmptyMessage{}, nil
 }
 
@@ -112,57 +153,6 @@ func RunGrpcServer(client *mongo.Client, port *int) error {
 
 	log.Printf("server listening at %v", lis.Addr())
 	return server.Serve(lis)
-}
-
-// *********************** Server methods **********************
-
-//func createNewOrder(o *mongo2.OrdersConnection, userId string) (string, error) {
-//	// TODO: Create a new order id for the given UserId. Add it to the DB and return the new order number
-//
-//	res, err := o.EmptyOrder(userId)
-//	if err != nil {
-//		return "", err
-//	}
-//	return res, nil
-//}
-//
-//func removeOrder(o *mongo2.OrdersConnection, orderId string) error {
-//	// TODO: Remove order from DB
-//	err := o.DeleteOrder(orderId)
-//	if err != nil {
-//		return err
-//	}
-//	return nil
-//}
-//
-//func getOrder(orderId string) (orderDetails, error) {
-//	// TODO: Collect order details from database replace for holders
-//	var userId string = "Frodo"
-//	var paid bool = false
-//	var totalCost float32 = 0
-//	var itemIds = []string{}
-//
-//	return orderDetails{
-//		orderId:   orderId,
-//		userId:    userId,
-//		paid:      paid,
-//		totalCost: totalCost,
-//		itemIds:   itemIds}, nil
-//}
-//
-//func addItemToOrder(orderId string, itemId string) error {
-//	// TODO: Add item to order
-//	return nil
-//}
-//
-//func removeItemFromOrder(orderId string, itemId string) error {
-//	// TODO: Remove item from order
-//	return nil
-//}
-
-func checkoutOrder(id string) error {
-	// TODO: Checkout order
-	return nil
 }
 
 type orderDetails struct {

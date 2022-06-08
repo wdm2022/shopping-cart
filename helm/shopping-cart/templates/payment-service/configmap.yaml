@@ -1,0 +1,18 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "shopping-cart.paymentService.configMap" . }}
+  labels:
+    {{- include "shopping-cart.labels" . | nindent 4 }}
+data:
+  config.yaml: |
+    mongo:
+      hosts:
+    {{- include "shopping-cart.paymentService.mongoHosts" . | nindent 8 }}
+      username: {{ index (index .Values "mongodb-payment" "auth" "usernames") 0 | quote }}
+      password: {{ index (index .Values "mongodb-payment" "auth" "passwords") 0 | quote }}
+      database: {{ index (index .Values "mongodb-payment" "auth" "databases") 0 | quote }}
+    stock-service:
+      address: {{ include "shopping-cart.stockService.serviceAddress" . }}
+    order-service:
+      address: {{ include "shopping-cart.orderService.serviceAddress" . }}

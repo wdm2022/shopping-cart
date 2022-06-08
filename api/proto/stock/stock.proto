@@ -7,8 +7,11 @@ service Stock {
   rpc Ping (EmptyMessage) returns (PingResponse) {}
   rpc Find (FindRequest) returns (FindResponse) {}
   rpc Subtract (SubtractRequest) returns (EmptyMessage) {}
+  rpc SubtractBatch (SubtractBatchRequest) returns (EmptyMessage) {}
   rpc Add (AddRequest) returns (EmptyMessage) {}
+  rpc AddBatch (AddBatchRequest) returns (EmptyMessage) {}
   rpc Create (CreateRequest) returns (CreateResponse) {}
+  rpc TotalCost (TotalCostRequest) returns (TotalCostResponse) {}
 }
 
 message FindRequest {
@@ -36,6 +39,23 @@ message CreateRequest {
 
 message CreateResponse {
   string itemId = 1;
+}
+
+message TotalCostRequest {
+  repeated string itemIds = 1;
+}
+
+message TotalCostResponse {
+  int64 totalCost = 1;
+}
+
+message SubtractBatchRequest {
+  string txId = 1;
+  repeated string itemIds = 2;
+}
+
+message AddBatchRequest {
+  repeated string itemIds = 1;
 }
 
 message PingRequest {}

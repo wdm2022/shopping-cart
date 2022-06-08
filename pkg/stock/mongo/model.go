@@ -8,6 +8,12 @@ const (
 	Price       = "price"
 )
 
+type Log struct {
+	TxId   primitive.ObjectID   `bson:"_id"`
+	Status string               `bson:"status"`
+	Items  []primitive.ObjectID `bson:"items"`
+}
+
 type Stock struct {
 	ItemId primitive.ObjectID `bson:"_id"`
 	Price  int64              `bson:"price"`

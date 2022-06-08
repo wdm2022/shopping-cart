@@ -1,0 +1,58 @@
+name: "Build Docker image"
+description: "Builds and potentially pushes the application Docker image"
+
+inputs:
+  push:
+    description: "If true then push to the repository"
+    required: true
+  target:
+    description: "Target stage to build"
+    required: false
+    default: ""
+  image-name:
+    description: "Name of the image, without tag"
+    required: true
+  cache_key:
+    description: Key of the GitHub Actions cache
+    required: false
+    default: ${{ runner.os }}-${{ github.workflow }}-${{ github.job }}-${{ github.ref_name }}
+
+runs:
+  using: "composite"
+  steps:
+    - name: Prepare Docker metadata
+      id: meta
+      uses: docker/metadata-action@98669ae865ea3cffbcbaa878cf57c20bbf1c6c38
+      with:
+        images: ${{ inputs.image-name }}
+        tags: |
+          type=semver,pattern={{version}}
+          type=semver,pattern={{major}}.{{minor}},enable=${{ !startsWith(github.ref, 'refs/tags/v0.0.') }}
+          type=semver,pattern={{major}},enable=${{ !startsWith(github.ref, 'refs/tags/v0.') }}
+          latest
+    - name: Prepare Docker layer cache
+      uses: actions/cache@v3
+      with:
+        path: /tmp/.buildx-cache
+        key: ${{ inputs.cache_key }}
+        restore-keys: |
+          ${{ inputs.cache_key }}
+          ${{ runner.os }}-${{ github.workflow }}-${{ github.job }}-
+    - name: Build Docker image
+      uses: docker/build-push-action@v3
+      with:
+        tags: ${{ steps.meta.outputs.tags }}
+        labels: ${{ steps.meta.outputs.labels }}
+        push: ${{ inputs.push }}
+        target: ${{ inputs.target }}
+        cache-from: type=local,src=/tmp/.buildx-cache
+        cache-to: type=local,dest=/tmp/.buildx-cache-new,mode=max
+    - name: Move cache
+      # Temp fix
+      # https://github.com/docker/build-push-action/issues/252
+      # https://github.com/moby/buildkit/issues/1896
+      # https://github.com/moby/buildkit/issues/2887
+      shell: bash
+      run: |
+        rm -rf /tmp/.buildx-cache
+        mv /tmp/.buildx-cache-new /tmp/.buildx-cache

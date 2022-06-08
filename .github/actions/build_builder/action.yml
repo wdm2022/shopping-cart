@@ -1,0 +1,54 @@
+name: "Build builder"
+description: "Builds the Docker builder image using BuildKit and GitHub Actions cache"
+
+inputs:
+  name:
+    description: Name of the builder image
+    required: true
+  context:
+    description: Path to the build context
+    required: false
+    default: "."
+  file:
+    description: Path to Dockerfile with the builder stage
+    required: false
+    default: "Dockerfile"
+  target:
+    description: Name of the target to build
+    required: false
+    default: builder
+  cache_key:
+    description: Key of the GitHub Actions cache
+    required: false
+    default: ${{ runner.os }}-${{ github.workflow }}-${{ github.job }}-${{ github.ref_name }}
+
+runs:
+  using: "composite"
+  steps:
+    - name: Prepare Docker layer cache
+      uses: actions/cache@v3
+      with:
+        path: /tmp/.buildx-cache
+        key: ${{ inputs.cache_key }}
+        restore-keys: |
+          ${{ inputs.cache_key }}
+          ${{ runner.os }}-${{ github.workflow }}-${{ github.job }}-
+    - name: Build builder
+      uses: docker/build-push-action@v3
+      with:
+        file: ${{ inputs.file }}
+        context: ${{ inputs.context }}
+        target: ${{ inputs.target }}
+        tags: ${{ inputs.name }}
+        load: true
+        cache-from: type=local,src=/tmp/.buildx-cache
+        cache-to: type=local,dest=/tmp/.buildx-cache-new,mode=max
+    - name: Move cache
+      # Temp fix
+      # https://github.com/docker/build-push-action/issues/252
+      # https://github.com/moby/buildkit/issues/1896
+      # https://github.com/moby/buildkit/issues/2887
+      shell: bash
+      run: |
+        rm -rf /tmp/.buildx-cache
+        mv /tmp/.buildx-cache-new /tmp/.buildx-cache

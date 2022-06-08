@@ -1,0 +1,51 @@
+{{ $fullName := include "shopping-cart.apiGateway.fullname" . }}
+{{ $svcPort := .Values.apiGateway.service.port }}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ $fullName }}
+  labels:
+    {{- include "shopping-cart.labels" . | nindent 4 }}
+  {{- with .Values.apiGateway.ingress.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  ingressClassName: {{ .Values.apiGateway.ingress.className }}
+  {{- if .Values.apiGateway.ingress.tls }}
+  tls:
+    {{- range .Values.apiGateway.ingress.tls }}
+    - hosts:
+        {{- range .hosts }}
+        - {{ . | quote }}
+        {{- end }}
+      secretName: {{ .secretName }}
+    {{- end }}
+  {{- end }}
+  rules:
+    {{- range .Values.apiGateway.ingress.hosts }}
+    - host: {{ . | quote }}
+      http:
+        paths:
+          - path: /order
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ $fullName }}
+                port:
+                  number: {{ $svcPort }}
+          - path: /payment
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ $fullName }}
+                port:
+                  number: {{ $svcPort }}
+          - path: /service
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ $fullName }}
+                port:
+                  number: {{ $svcPort }}
+    {{- end }}

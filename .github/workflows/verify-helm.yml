@@ -1,0 +1,36 @@
+name: Verify Helm
+
+on:
+  pull_request:
+    branches: [ master ]
+  push:
+    tags-ignore: [ 'v*.*.*' ]
+    branches-ignore: [ 'gh-pages' ]
+    paths:
+      - 'helm/**'
+
+env:
+  HELM_BUILDER_NAME: shopping-cart/helm-builder
+
+jobs:
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: docker/setup-buildx-action@v2
+      - name: Prepare builder
+        uses: ./.github/actions/build_builder
+        with:
+          file: helm/Dockerfile
+          name: ${{ env.HELM_BUILDER_NAME }}
+      - name: Download subcharts
+        uses: ./.github/actions/run_builder
+        with:
+          image: ${{ env.HELM_BUILDER_NAME }}
+          command: task helm:dependencies:update
+      - name: Lint chart
+        uses: ./.github/actions/run_builder
+        with:
+          image: ${{ env.HELM_BUILDER_NAME }}
+          command: task helm:lint
