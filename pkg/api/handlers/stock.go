@@ -8,7 +8,7 @@ import (
 
 func GetStock(c *fiber.Ctx) error {
 
-	itemId := c.Params("itemId")
+	itemId := c.Params("item_id")
 
 	// Invalid id / default value returned by c.params
 	if itemId == "" {
@@ -32,7 +32,7 @@ func GetStock(c *fiber.Ctx) error {
 }
 
 func SubtractStock(c *fiber.Ctx) error {
-	itemId := c.Params("itemId")
+	itemId := c.Params("item_id")
 	// Invalid id / default value returned by c.params
 	if itemId == "" {
 		return c.SendStatus(400)
@@ -53,7 +53,7 @@ func SubtractStock(c *fiber.Ctx) error {
 }
 
 func AddStock(c *fiber.Ctx) error {
-	itemId := c.Params("itemId")
+	itemId := c.Params("item_id")
 	// Invalid id / default value returned by c.params
 	if itemId == "" {
 		return c.SendStatus(400)
