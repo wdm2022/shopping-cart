@@ -20,8 +20,7 @@ import (
 var (
 	ctx         = context.Background()
 	mongoConfig = mongoUtils.Config{
-		Host:     "localhost",
-		Port:     27017,
+		Hosts:    []string{"localhost:27017"},
 		Username: "root",
 		Password: "LoFiBeats",
 		Database: "payment",
