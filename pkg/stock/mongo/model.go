@@ -9,9 +9,9 @@ const (
 )
 
 type Log struct {
-	TxId   primitive.ObjectID `bson:"_id"`
-	status string             `bson:"status"`
-	//todo list of itemid and by how much they were subtracted
+	TxId   primitive.ObjectID   `bson:"_id"`
+	Status string               `bson:"status"`
+	Items  []primitive.ObjectID `bson:"items"`
 }
 
 type Stock struct {
