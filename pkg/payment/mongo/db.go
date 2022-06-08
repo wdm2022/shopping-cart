@@ -136,7 +136,12 @@ func (p *PaymentConnection) PayOrder(txId string, userId string, orderId string,
 		// for if this is not used in a sage, but with the "endpoint"
 		emptyHex := primitive.ObjectID{}.Hex()
 		if txId != emptyHex {
-			logRes := p.LogCollection.FindOne(sessCtx, bson.D{{LogId, objTxId}})
+			logRes := p.LogCollection.FindOne(sessCtx, bson.D{
+				primitive.E{
+					Key: LogId, Value: objTxId,
+				},
+			},
+			)
 
 			if logRes.Err() == mongo.ErrNoDocuments {
 				// we have not handled this yet
@@ -149,19 +154,21 @@ func (p *PaymentConnection) PayOrder(txId string, userId string, orderId string,
 		}
 		// find user that doesn't have this order, so we haven't paid it yet
 		query := bson.D{
-			{
-				userId, objUserId,
+			primitive.E{
+				Key: userId, Value: objUserId,
 			},
-			{Key: Orders, Value: primitive.E{
-				Key: "$not",
-				Value: primitive.E{
-					Key: "$eq",
+			primitive.E{
+				Key: Orders, Value: primitive.E{
+					Key: "$not",
 					Value: primitive.E{
-						Key:   OrderId,
-						Value: objOrderId,
+						Key: "$eq",
+						Value: primitive.E{
+							Key:   OrderId,
+							Value: objOrderId,
+						},
 					},
 				},
-			}},
+			},
 		}
 		res := p.PaymentCollection.FindOne(sessCtx, query)
 		if res.Err() != nil {
