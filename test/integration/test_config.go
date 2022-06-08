@@ -8,6 +8,8 @@ import (
 	"strings"
 	"testing"
 
+	mongoUtils "shopping-cart/pkg/utils/mongo"
+
 	mongoDriver "go.mongodb.org/mongo-driver/mongo"
 
 	"github.com/docker/go-connections/nat"
@@ -23,7 +25,7 @@ var (
 
 const mongodbPort = 27017
 
-func setupSuite(tb testing.TB) (int, func(tb testing.TB, client mongoDriver.Client)) {
+func setupSuite(tb testing.TB) (mongoUtils.Config, func(tb testing.TB, client mongoDriver.Client)) {
 	if testing.Short() {
 		tb.Skip("skipping test in short mode.")
 	}
@@ -68,7 +70,15 @@ func setupSuite(tb testing.TB) (int, func(tb testing.TB, client mongoDriver.Clie
 		tb.Error(err)
 	}
 
-	return portNum, func(tb testing.TB, client mongoDriver.Client) {
+	host := "localhost:" + strconv.Itoa(portNum)
+	connectionConfig := mongoUtils.Config{
+		Hosts:    []string{host},
+		Username: "root",
+		Password: "LoFiBeats",
+		Database: "",
+	}
+
+	return connectionConfig, func(tb testing.TB, client mongoDriver.Client) {
 		mongoC.Terminate(ctx)
 	}
 }
