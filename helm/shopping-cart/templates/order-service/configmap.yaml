@@ -6,6 +6,12 @@ metadata:
     {{- include "shopping-cart.labels" . | nindent 4 }}
 data:
   config.yaml: |
+    mongo:
+      hosts:
+    {{- include "shopping-cart.orderService.mongoHosts" . | nindent 8 }}
+      username: {{ index (index .Values "mongodb-order" "auth" "usernames") 0 | quote }}
+      password: {{ index (index .Values "mongodb-order" "auth" "passwords") 0 | quote }}
+      database: {{ index (index .Values "mongodb-order" "auth" "databases") 0 | quote }}
     stock-service:
       address: {{ include "shopping-cart.stockService.serviceAddress" . }}
     payment-service:

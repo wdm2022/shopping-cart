@@ -2,7 +2,6 @@ package mongo
 
 import (
 	"context"
-	"fmt"
 	"log"
 	"time"
 
@@ -17,12 +16,10 @@ func Connect(config *Config) mongoDriver.Client {
 		AuthSource: config.Database,
 	}
 
-	// TODO: Handle multiple hosts when working with Mongo replica set
-	hosts := []string{fmt.Sprintf("%s:%v", config.Host, config.Port)}
-
 	clientOptions := options.Client()
 	clientOptions.SetAuth(credential)
-	clientOptions.SetHosts(hosts)
+	clientOptions.SetHosts(config.Hosts)
+	clientOptions.SetDirect(config.DirectConnection)
 
 	client, err := mongoDriver.NewClient(clientOptions)
 	if err != nil {

@@ -2,18 +2,17 @@ package handlers
 
 import (
 	"github.com/gofiber/fiber/v2"
-	"net/http"
 	paymentApi "shopping-cart/api/proto/payment"
 	"shopping-cart/pkg/payment"
 )
 
 func PlaceOrderPayment(c *fiber.Ctx) error {
-	userId := c.Params("userId")
+	userId := c.Params("user_id")
 	// Invalid id / default value returned by c.params
 	if userId == "" {
 		return c.SendStatus(400)
 	}
-	orderId := c.Params("orderId")
+	orderId := c.Params("order_id")
 	// Invalid id / default value returned by c.params
 	if orderId == "" {
 		return c.SendStatus(400)
@@ -35,12 +34,12 @@ func PlaceOrderPayment(c *fiber.Ctx) error {
 
 func CancelOrderPayment(c *fiber.Ctx) error {
 
-	userId := c.Params("userId")
+	userId := c.Params("user_id")
 	// Invalid id / default value returned by c.params
 	if userId == "" {
 		return c.SendStatus(400)
 	}
-	orderId := c.Params("orderId")
+	orderId := c.Params("order_id")
 	// Invalid id / default value returned by c.params
 	if orderId == "" {
 		return c.SendStatus(400)
@@ -55,12 +54,12 @@ func CancelOrderPayment(c *fiber.Ctx) error {
 }
 
 func GetOrderPayment(c *fiber.Ctx) error {
-	userId := c.Params("userId")
+	userId := c.Params("user_id")
 	// Invalid id / default value returned by c.params
 	if userId == "" {
 		return c.SendStatus(400)
 	}
-	orderId := c.Params("orderId")
+	orderId := c.Params("order_id")
 	// Invalid id / default value returned by c.params
 	if orderId == "" {
 		return c.SendStatus(400)
@@ -81,7 +80,7 @@ func GetOrderPayment(c *fiber.Ctx) error {
 }
 
 func AddFunds(c *fiber.Ctx) error {
-	userId := c.Params("userId")
+	userId := c.Params("user_id")
 	// Invalid id / default value returned by c.params
 	if userId == "" {
 		return c.SendStatus(400)
@@ -108,18 +107,22 @@ func AddFunds(c *fiber.Ctx) error {
 
 // TODO: which operation should this function call?
 func CreatePaymentUser(c *fiber.Ctx) error {
-	resp, err := http.Post("create-order", "order", nil)
+	//resp, err := http.Post("create-order", "order", nil)
+	user, err := payment.CreateUser(&paymentApi.EmptyMessage{})
+	if err != nil {
+		return err
+	}
 	if err != nil {
 		return err
 	}
 
 	return c.JSON(fiber.Map{
-		"resp": resp,
+		"user_id": user.UserId,
 	})
 }
 
 func GetUser(c *fiber.Ctx) error {
-	userId := c.Params("userId")
+	userId := c.Params("user_id")
 
 	// Invalid id / default value returned by c.params
 	if userId == "" {

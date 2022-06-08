@@ -2,15 +2,17 @@
 
 services:
   mongo:
-    image: mongo:4.4
+    image: bitnami/mongodb:4.4
     ports:
       - "127.0.0.1:27017:27017"
     environment:
-      MONGO_INITDB_ROOT_USERNAME: root
-      MONGO_INITDB_ROOT_PASSWORD: LoFiBeats
+      MONGODB_REPLICA_SET_MODE: "primary"
+      MONGODB_ROOT_PASSWORD: "LoFiBeats"
+      MONGODB_REPLICA_SET_KEY: "AsteriosWasRightMongoIsGarbage"
+      MONGODB_ADVERTISED_HOSTNAME: "mongo"
     volumes:
-      - "mongo-data:/data/db"
-      - "./mongo/init.js:/docker-entrypoint-initdb.d/init.js"
+      - "mongo-data:/bitnami/mongodb"
+      - "./dev/mongo/init.js:/docker-entrypoint-initdb.d/init.js"
 
 volumes:
   mongo-data: {}

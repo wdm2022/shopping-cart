@@ -49,6 +49,17 @@ To execute arbitrary Docker Compose command `<COMMAND>`, call:
 task dist:compose -- <COMMAND>
 ```
 
+### Connecting to MongoDB
+
+Since the local MongoDB instance is run is the replica set mode and advertises the internal Docker hostname 
+to other containers, in order to connect to it from the host machine it is necessary to configure the client to 
+ignore the advertised hostname and connect to the instance directly, 
+by specifying the `directConnection` option in the connection string:
+
+```
+mongodb://root:password@localhost:27017/?directConnection=true
+```
+
 ## Running the services
 
 Individual services can be built and executed locally with the `run_*` Task tasks.

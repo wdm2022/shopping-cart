@@ -75,6 +75,7 @@ func (o stockServer) TotalCost(ctx context.Context, in *stockApi.TotalCostReques
 	//TODO: Create a db call which returns the price for each item
 	totalCost, err := o.stockConn.CalculateTotalCost(in.ItemIds)
 	if err != nil {
+		fmt.Println("error when calculating total cost", err)
 		return nil, err
 	}
 
@@ -84,7 +85,7 @@ func (o stockServer) TotalCost(ctx context.Context, in *stockApi.TotalCostReques
 func (o stockServer) SubtractBatch(ctx context.Context, in *stockApi.SubtractBatchRequest) (*stockApi.EmptyMessage, error) {
 	fmt.Println("Received a total cost request for the following items: ", in.ItemIds)
 
-	err := o.stockConn.SubtractBatchStock(in.ItemIds)
+	err := o.stockConn.SubtractBatchStock(in.TxId, in.ItemIds)
 	if err != nil {
 		return nil, err
 	}

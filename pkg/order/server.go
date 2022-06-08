@@ -64,7 +64,11 @@ func (o orderServer) GetOrder(ctx context.Context, in *orderApi.GetOrderRequest)
 		return t.Hex()
 	})
 
-	totalCost, _ := stock.TotalCost(&stockApi.TotalCostRequest{ItemIds: itemList})
+	totalCost, err := stock.TotalCost(&stockApi.TotalCostRequest{ItemIds: itemList})
+	if err != nil {
+		fmt.Println("err when getting total cost", err)
+		return nil, err
+	}
 	return &orderApi.GetOrderResponse{OrderId: order.OrderId.Hex(),
 		Paid:      order.Paid,
 		UserId:    order.UserId.Hex(),
@@ -101,6 +105,8 @@ func (o orderServer) Checkout(ctx context.Context, in *orderApi.CheckoutRequest)
 	//TODO - Implement the DB calls in the corresponding microservices. #Rahim :)
 
 	// TODO - Add checks which see if everything worked and add logic which maybe reserves the items for this order?
+	// use random as an txid
+	txId := primitive.NewObjectID().Hex()
 
 	// Get the order details from the db
 	order, orderErr := o.orderConn.FindOrder(in.OrderId)
@@ -119,13 +125,13 @@ func (o orderServer) Checkout(ctx context.Context, in *orderApi.CheckoutRequest)
 	}
 
 	// Process payment
-	_, payErr := payment.Pay(&paymentApi.PayRequest{UserId: userId, OrderId: in.OrderId, Amount: totalCost.TotalCost})
+	_, payErr := payment.Pay(&paymentApi.PayRequest{TxId: txId, UserId: userId, OrderId: in.OrderId, Amount: totalCost.TotalCost})
 	if payErr != nil {
 		return nil, payErr
 	}
 
 	// Remove items in the order from stock
-	_, stockErr2 := stock.SubtractBatch(&stockApi.SubtractBatchRequest{ItemIds: itemIds})
+	_, stockErr2 := stock.SubtractBatch(&stockApi.SubtractBatchRequest{TxId: txId, ItemIds: itemIds})
 	if payErr != nil {
 		return nil, stockErr2
 	}

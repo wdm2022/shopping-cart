@@ -4,20 +4,24 @@ import (
 	"context"
 	"errors"
 	"shopping-cart/pkg/db"
+	"shopping-cart/pkg/utils"
 
+	sf "github.com/sa-/slicefunk"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
 const (
-	DbName         = "stock"
-	CollectionName = "stock"
+	DbName              = "stock"
+	StockCollectionName = "stock"
+	LogCollectionName   = "logs"
 )
 
 type StockConnection struct {
 	db.MongoConnection
 	StockCollection *mongo.Collection
+	LogCollection   *mongo.Collection
 	//add a context with timeout?
 }
 
@@ -28,7 +32,8 @@ func Init(client *mongo.Client) *StockConnection {
 			Database: database,
 			Client:   client,
 		},
-		StockCollection: database.Collection(CollectionName),
+		StockCollection: database.Collection(StockCollectionName),
+		LogCollection:   database.Collection(LogCollectionName),
 	}
 }
 
@@ -162,13 +167,141 @@ func (o *StockConnection) FindStock(itemId string) (*Stock, error) {
 }
 
 func (o *StockConnection) CalculateTotalCost(itemIds []string) (int64, error) {
-	var totalCost int64 = 0
-	// TODO: Add DB call to calculate total with the provided list of items. #Rahim :)
-	return totalCost, nil
+	objIds := sf.Map(itemIds, func(t string) primitive.ObjectID {
+		id, err := primitive.ObjectIDFromHex(t)
+		if err != nil {
+			return [12]byte{}
+		}
+		return id
+	})
+	ctx, cancelFunc := utils.ContextWithTimeOut()
+	defer cancelFunc()
+	aggregate, err := o.StockCollection.Aggregate(ctx, []bson.M{
+		{
+			"$match": bson.M{
+				ItemId: bson.M{
+					"$in": objIds,
+				},
+			},
+		},
+		{
+			"$group": bson.M{
+				"_id": nil,
+				"total": bson.M{
+					"$sum": "$price",
+				},
+			},
+		}, /*, {
+			"$project": bson.M{
+				"total": bson.M{
+					"$toString": "$total1",
+				},
+			},
+		},*/
+	})
+	if err != nil {
+		return 0, err
+	}
+
+	//idk mongo gives this format as a result : {"_id": null,"total": {"$numberLong":"1"}} if I don't convert to string
+
+	// screw this, just do it manually
+	//type costRes struct {
+	//	id    primitive.ObjectID `bson:"_id"`
+	//	total string             `bson:"total"`
+	//}
+
+	aggregate.Next(ctx)
+	totcalCost, ok := aggregate.Current.Index(1).Value().Int64OK()
+	if !ok {
+		return 0, errors.New("failed to convert to int")
+	}
+	if aggregate.Current == nil {
+		// no result
+		return 0, nil
+	} else if err != nil {
+		return 0, err
+	}
+
+	return totcalCost, nil
 }
 
-func (o *StockConnection) SubtractBatchStock(itemIds []string) error {
+func (o *StockConnection) SubtractBatchStock(txId string, itemIds []string) error {
 	// TODO: Add DB call to remove the stock using the provided list of items. #Rahim :)
+
+	objTxId, err := primitive.ObjectIDFromHex(txId)
+	if err != nil {
+		return err
+	}
+
+	amounts := make(map[primitive.ObjectID]int64)
+	objIds := sf.Map(itemIds, func(t string) primitive.ObjectID {
+		objId, _ := primitive.ObjectIDFromHex(t)
+		amounts[objId] = amounts[objId] + 1
+		return objId
+	})
+	ctx, cancel := utils.ContextWithTimeOut()
+	defer cancel()
+	callback := func(sessCtx mongo.SessionContext) (interface{}, error) {
+
+		logRes := o.LogCollection.FindOne(sessCtx, bson.D{
+			primitive.E{
+				Key:   "_id",
+				Value: objTxId,
+			},
+		})
+
+		if logRes.Err() == mongo.ErrNoDocuments {
+			// we have not handled this yet
+		} else if logRes.Err() != nil {
+			return false, logRes.Err()
+		} else {
+			//we have handled this
+			return true, nil
+		}
+
+		//todo How do to all of this in one call to database.
+		for _, id := range objIds {
+			query := bson.M{"_id": id}
+			add := bson.D{
+				primitive.E{
+					Key: "$inc",
+					Value: bson.D{
+						primitive.E{
+							Key:   StockAmount,
+							Value: 0 - amounts[id],
+						},
+					},
+				},
+			}
+
+			_, err := o.StockCollection.UpdateOne(sessCtx, query, add)
+			if err != nil {
+				return nil, err
+			}
+		}
+
+		_, err = o.LogCollection.InsertOne(sessCtx, Log{
+			TxId:   objTxId,
+			Status: "done",
+			Items:  objIds,
+		})
+		if err != nil {
+			return nil, err
+		}
+
+		return nil, nil
+	}
+	session, err := o.Client.StartSession()
+	if err != nil {
+		return err
+	}
+	defer session.EndSession(ctx)
+	_, err = session.WithTransaction(ctx, callback)
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
 
