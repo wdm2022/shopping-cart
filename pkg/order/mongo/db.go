@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"shopping-cart/pkg/db"
+	"shopping-cart/pkg/utils"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -11,13 +12,15 @@ import (
 )
 
 const (
-	DbName         = "order"
-	CollectionName = "orders"
+	DbName              = "order"
+	OrderCollectionName = "orders"
+	LogCollectionName   = "log"
 )
 
 type OrdersConnection struct {
 	db.MongoConnection
 	OrderCollection *mongo.Collection
+	LogCollection   *mongo.Collection
 	//ctx             context.Context
 }
 
@@ -29,7 +32,8 @@ func Init(client *mongo.Client) *OrdersConnection {
 			Database: database,
 			Client:   client,
 		},
-		OrderCollection: database.Collection(CollectionName),
+		OrderCollection: database.Collection(OrderCollectionName),
+		LogCollection:   database.Collection(LogCollectionName),
 	}
 }
 
@@ -159,6 +163,89 @@ func (orderConn *OrdersConnection) AddItem(orderId string, itemId string) error 
 		return errors.New("updated 0 documents")
 	}
 	return nil
+}
+
+func (orderConn *OrdersConnection) StartTransaction(txId string) error {
+	objTxId, err := primitive.ObjectIDFromHex(txId)
+	if err != nil {
+		return err
+	}
+
+	ctx, cancel := utils.ContextWithTimeOut()
+	defer cancel()
+
+	_, err = orderConn.LogCollection.InsertOne(ctx, Log{
+		TxId:   objTxId,
+		Status: "started",
+	})
+	if err != nil {
+		return err
+	}
+
+	return nil
+
+}
+
+func (orderConn *OrdersConnection) EndTransaction(txId string) error {
+	objTxId, err := primitive.ObjectIDFromHex(txId)
+	if err != nil {
+		return err
+	}
+
+	ctx, cancel := utils.ContextWithTimeOut()
+	defer cancel()
+
+	query := bson.D{
+		primitive.E{
+			Key:   "_id", //todo txid
+			Value: objTxId,
+		},
+	}
+
+	//todo don't use literals
+	update := bson.D{{
+		Key:   "status",
+		Value: "done",
+	}}
+
+	_, err = orderConn.LogCollection.UpdateOne(ctx, query, update)
+	if err != nil {
+		return err
+	}
+
+	return nil
+
+}
+
+func (orderConn *OrdersConnection) RevertTransaction(txId string) error {
+	objTxId, err := primitive.ObjectIDFromHex(txId)
+	if err != nil {
+		return err
+	}
+
+	ctx, cancel := utils.ContextWithTimeOut()
+	defer cancel()
+
+	query := bson.D{
+		primitive.E{
+			Key:   "_id", //todo txid
+			Value: objTxId,
+		},
+	}
+
+	//don't use literals
+	update := bson.D{{
+		Key:   "status",
+		Value: "reverted",
+	}}
+
+	_, err = orderConn.LogCollection.UpdateOne(ctx, query, update)
+	if err != nil {
+		return err
+	}
+
+	return nil
+
 }
 
 /*

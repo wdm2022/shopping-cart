@@ -108,6 +108,11 @@ func (o orderServer) Checkout(ctx context.Context, in *orderApi.CheckoutRequest)
 	// use random as an txid
 	txId := primitive.NewObjectID().Hex()
 
+	err := o.orderConn.StartTransaction(txId)
+	if err != nil {
+		return nil, err
+	}
+
 	// Get the order details from the db
 	order, orderErr := o.orderConn.FindOrder(in.OrderId)
 	userId := order.UserId.Hex()
@@ -134,6 +139,11 @@ func (o orderServer) Checkout(ctx context.Context, in *orderApi.CheckoutRequest)
 	_, stockErr2 := stock.SubtractBatch(&stockApi.SubtractBatchRequest{TxId: txId, ItemIds: itemIds})
 	if payErr != nil {
 		return nil, stockErr2
+	}
+
+	err = o.orderConn.EndTransaction(txId)
+	if err != nil {
+		return nil, err
 	}
 
 	// TODO: add succes/fail error messages on return

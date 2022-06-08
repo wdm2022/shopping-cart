@@ -17,3 +17,8 @@ type Order struct {
 	UserId    primitive.ObjectID   `bson:"user_id"`
 	TotalCost int64                `bson:"total_cost"`
 }
+
+type Log struct {
+	TxId   primitive.ObjectID `bson:"_id"`
+	Status string             `bson:"status"` //"started,done,reverted"
+}
