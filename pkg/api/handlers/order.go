@@ -9,7 +9,7 @@ import (
 
 // TODO: This is not a function belonging to the Order, it should be in payment
 func CreateUser(c *fiber.Ctx) error {
-	userId := c.Params("userId")
+	userId := c.Params("user_id")
 
 	// Invalid id / default value returned by c.params
 	if userId == "" {
@@ -23,12 +23,12 @@ func CreateUser(c *fiber.Ctx) error {
 	}
 
 	return c.JSON(fiber.Map{
-		"userId": response.OrderId,
+		"user_id": response.OrderId,
 	})
 }
 
 func GetOrder(c *fiber.Ctx) error {
-	orderId := c.Params("orderId")
+	orderId := c.Params("order_id")
 
 	// Invalid id / default value returned by c.params
 	if orderId == "" {
@@ -62,13 +62,13 @@ func GetOrder(c *fiber.Ctx) error {
 }
 
 func AddItem(c *fiber.Ctx) error {
-	orderId := c.Params("orderId")
+	orderId := c.Params("order_id")
 	// Invalid id / default value returned by c.params
 	if orderId == "" {
 		return c.SendStatus(fiber.StatusBadRequest)
 	}
 
-	itemId := c.Params("itemId")
+	itemId := c.Params("item_id")
 	// Invalid id / default value returned by c.params
 	if itemId == "" {
 		return c.SendStatus(fiber.StatusBadRequest)
@@ -84,13 +84,13 @@ func AddItem(c *fiber.Ctx) error {
 }
 
 func DeleteItem(c *fiber.Ctx) error {
-	orderId := c.Params("orderId")
+	orderId := c.Params("order_id")
 	// Invalid id / default value returned by c.params
 	if orderId == "" {
 		return c.SendStatus(fiber.StatusBadRequest)
 	}
 
-	itemId := c.Params("itemId")
+	itemId := c.Params("item_id")
 	// Invalid id / default value returned by c.params
 	if itemId == "" {
 		return c.SendStatus(fiber.StatusBadRequest)
@@ -106,7 +106,7 @@ func DeleteItem(c *fiber.Ctx) error {
 }
 
 func DeleteOrder(c *fiber.Ctx) error {
-	orderId := c.Params("orderId")
+	orderId := c.Params("order_id")
 
 	// Invalid id / default value returned by c.params
 	if orderId == "" {
@@ -123,7 +123,7 @@ func DeleteOrder(c *fiber.Ctx) error {
 }
 
 func CreateOrder(c *fiber.Ctx) error {
-	userId := c.Params("userId")
+	userId := c.Params("user_id")
 
 	// Invalid id / default value returned by c.params
 	if userId == "" {
@@ -143,4 +143,21 @@ func CreateOrder(c *fiber.Ctx) error {
 	return c.JSON(fiber.Map{
 		"order_id": response.OrderId,
 	})
+}
+
+func Checkout(c *fiber.Ctx) error {
+	orderId := c.Params("order_id")
+
+	// Invalid id / default value returned by c.params
+	if orderId == "" {
+		return c.SendStatus(400)
+	}
+
+	_, err := order.Checkout(&orderApi.CheckoutRequest{OrderId: orderId})
+
+	if err != nil {
+		return c.SendStatus(fiber.StatusBadRequest)
+	}
+
+	return c.SendStatus(fiber.StatusOK)
 }

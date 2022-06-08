@@ -43,7 +43,8 @@ Mongo hosts.
 */}}
 {{- define "shopping-cart.paymentService.mongoHosts" -}}
 {{- $fullname := include "shopping-cart.fullname" . }}
+{{- $mongoSvcName := printf "%s-mongodb-payment" $fullname }}
 {{- range until (index .Values "mongodb-payment" "replicaCount" | int) }}
-- {{ printf "%s-mongodb-payment-%v" $fullname . | quote }}
+- {{ printf "%s-%v.%s-headless" $mongoSvcName . $mongoSvcName | quote }}
 {{- end }}
 {{- end }}

@@ -16,7 +16,7 @@ func bindOrdersApi(app *fiber.App) {
 	orders.Get("/find/:orderId", handlers.GetOrder)
 	orders.Post("/addItem/:orderId/:itemId", handlers.AddItem)
 	orders.Delete("/removeItem/:orderId/:itemId", handlers.DeleteItem)
-	orders.Post("/checkout/:orderId", handlers.CreateOrder)
+	orders.Post("/checkout/:orderId", handlers.Checkout)
 }
 
 func bindStockApi(app *fiber.App) {
