@@ -277,7 +277,8 @@ func (o *StockConnection) SubtractBatchStock(txId string, itemIds []string) erro
 
 		_, err = o.LogCollection.InsertOne(sessCtx, Log{
 			TxId:   objTxId,
-			status: "done",
+			Status: "done",
+			Items:  objIds,
 		})
 		if err != nil {
 			return nil, err

@@ -196,8 +196,9 @@ func (p *PaymentConnection) PayOrder(txId string, userId string, orderId string,
 			_, err := p.LogCollection.InsertOne(sessCtx, Log{
 				TxId:    objTxId,
 				Status:  "done",
-				amount:  amount,
-				orderId: objOrderId,
+				Amount:  amount,
+				OrderId: objOrderId,
+				UserId:  objUserId,
 			})
 
 			if err != nil {
