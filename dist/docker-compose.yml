@@ -14,7 +14,7 @@ services:
     ports:
       - "127.0.0.1:50000:50000"
     environment:
-      MONGO_HOST: "mongo"
+      MONGO_HOSTS: "mongo"
       MONGO_USERNAME: "order"
       MONGO_PASSWORD: "password"
       MONGO_DATABASE: "order"
@@ -25,7 +25,7 @@ services:
     ports:
       - "127.0.0.1:50001:50001"
     environment:
-      MONGO_HOST: "mongo"
+      MONGO_HOSTS: "mongo"
       MONGO_USERNAME: "payment"
       MONGO_PASSWORD: "password"
       MONGO_DATABASE: "payment"
@@ -36,7 +36,7 @@ services:
     ports:
       - "127.0.0.1:50002:50002"
     environment:
-      MONGO_HOST: "mongo"
+      MONGO_HOSTS: "mongo"
       MONGO_USERNAME: "stock"
       MONGO_PASSWORD: "password"
       MONGO_DATABASE: "stock"
