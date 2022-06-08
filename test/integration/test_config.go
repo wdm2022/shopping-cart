@@ -24,6 +24,9 @@ var (
 const mongodbPort = 27017
 
 func setupSuite(tb testing.TB) (int, func(tb testing.TB, client mongoDriver.Client)) {
+	if testing.Short() {
+		tb.Skip("skipping test in short mode.")
+	}
 	envVars := make(map[string]string)
 	envVars["MONGO_INITDB_ROOT_USERNAME"] = "LoFiBeats"
 	envVars["MONGO_INITDB_ROOT_PASSWORD"] = "LoFiBeats"
