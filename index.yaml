@@ -2,6 +2,29 @@ apiVersion: v1
 entries:
   shopping-cart:
   - apiVersion: v2
+    appVersion: 0.1.0
+    created: "2022-06-08T12:42:08.09129816Z"
+    dependencies:
+    - alias: mongodb-order
+      name: mongodb
+      repository: https://charts.bitnami.com/bitnami
+      version: 12.1.16
+    - alias: mongodb-stock
+      name: mongodb
+      repository: https://charts.bitnami.com/bitnami
+      version: 12.1.16
+    - alias: mongodb-payment
+      name: mongodb
+      repository: https://charts.bitnami.com/bitnami
+      version: 12.1.16
+    description: Shopping cart system
+    digest: 2b19bc6a6cbf0e8a2cecab6395a35b6e1cdc551545641048d3c6094bbac43a83
+    name: shopping-cart
+    type: application
+    urls:
+    - https://github.com/wdm2022/shopping-cart/releases/download/v0.1.0/shopping-cart-0.1.0.tgz
+    version: 0.1.0
+  - apiVersion: v2
     appVersion: 0.0.5
     created: "2022-06-02T02:21:19.204230986Z"
     description: Shopping cart system
@@ -11,4 +34,4 @@ entries:
     urls:
     - https://github.com/wdm2022/shopping-cart/releases/download/v0.0.5/shopping-cart-0.0.5.tgz
     version: 0.0.5
-generated: "2022-06-02T02:21:19.204236586Z"
+generated: "2022-06-08T12:42:08.091317661Z"
