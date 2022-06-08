@@ -24,7 +24,12 @@ jobs:
         with:
           file: helm/Dockerfile
           name: ${{ env.HELM_BUILDER_NAME }}
-      - name: Lint learning service
+      - name: Download subcharts
+        uses: ./.github/actions/run_builder
+        with:
+          image: ${{ env.HELM_BUILDER_NAME }}
+          command: task helm:dependencies:update
+      - name: Lint chart
         uses: ./.github/actions/run_builder
         with:
           image: ${{ env.HELM_BUILDER_NAME }}

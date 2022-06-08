@@ -22,3 +22,17 @@ version: 0.1.0
 # follow Semantic Versioning. They should reflect the version the application is using.
 # It is recommended to use it with quotes.
 appVersion: "latest"
+
+dependencies:
+  - name: mongodb
+    version: 12.1.16
+    repository: https://charts.bitnami.com/bitnami
+    alias: mongodb-order
+  - name: mongodb
+    version: 12.1.16
+    repository: https://charts.bitnami.com/bitnami
+    alias: mongodb-stock
+  - name: mongodb
+    version: 12.1.16
+    repository: https://charts.bitnami.com/bitnami
+    alias: mongodb-payment

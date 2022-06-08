@@ -37,3 +37,13 @@ ConfigMap name.
 {{- define "shopping-cart.paymentService.configMap" -}}
 {{- printf "%s-config" (include "shopping-cart.paymentService.fullname" .) | trunc 63 | trimSuffix "-" }}
 {{- end }}
+
+{{/*
+Mongo hosts.
+*/}}
+{{- define "shopping-cart.paymentService.mongoHosts" -}}
+{{- $fullname := include "shopping-cart.fullname" . }}
+{{- range until (index .Values "mongodb-payment" "replicaCount" | int) }}
+- {{ printf "%s-mongodb-payment-%v" $fullname . | quote }}
+{{- end }}
+{{- end }}

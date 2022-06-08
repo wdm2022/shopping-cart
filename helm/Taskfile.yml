@@ -6,8 +6,11 @@ vars:
   VERSION: '{{ .VERSION | default "1.0.0-DEV" }}'
 
 tasks:
+  prepare:
+    - task: dependencies:update
   lint: "helm lint shopping-cart"
   package: "helm package shopping-cart --version {{.VERSION}} --app-version {{.VERSION}} -d charts"
+  dependencies:update: "helm dependency update shopping-cart"
   build_builder: "docker build --target builder -t {{.HELM_BUILDER_IMAGE}} ."
   docker_run:
     deps: [ build_builder ]
