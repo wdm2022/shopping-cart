@@ -57,4 +57,3 @@ message PingResponse {
 }
 
 message EmptyMessage {}
-
