@@ -43,7 +43,8 @@ Mongo hosts.
 */}}
 {{- define "shopping-cart.orderService.mongoHosts" -}}
 {{- $fullname := include "shopping-cart.fullname" . }}
+{{- $mongoSvcName := printf "%s-mongodb-order" $fullname }}
 {{- range until (index .Values "mongodb-order" "replicaCount" | int) }}
-- {{ printf "%s-mongodb-order-%v" $fullname . | quote }}
+- {{ printf "%s-%v.%s-headless" $mongoSvcName . $mongoSvcName | quote }}
 {{- end }}
 {{- end }}
