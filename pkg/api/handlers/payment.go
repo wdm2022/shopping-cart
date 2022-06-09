@@ -7,12 +7,12 @@ import (
 )
 
 func PlaceOrderPayment(c *fiber.Ctx) error {
-	userId := c.Params("user_id")
+	userId := c.Params("userId")
 	// Invalid id / default value returned by c.params
 	if userId == "" {
 		return c.SendStatus(400)
 	}
-	orderId := c.Params("order_id")
+	orderId := c.Params("orderId")
 	// Invalid id / default value returned by c.params
 	if orderId == "" {
 		return c.SendStatus(400)
@@ -33,13 +33,12 @@ func PlaceOrderPayment(c *fiber.Ctx) error {
 }
 
 func CancelOrderPayment(c *fiber.Ctx) error {
-
-	userId := c.Params("user_id")
+	userId := c.Params("userId")
 	// Invalid id / default value returned by c.params
 	if userId == "" {
 		return c.SendStatus(400)
 	}
-	orderId := c.Params("order_id")
+	orderId := c.Params("orderId")
 	// Invalid id / default value returned by c.params
 	if orderId == "" {
 		return c.SendStatus(400)
@@ -54,12 +53,12 @@ func CancelOrderPayment(c *fiber.Ctx) error {
 }
 
 func GetOrderPayment(c *fiber.Ctx) error {
-	userId := c.Params("user_id")
+	userId := c.Params("userId")
 	// Invalid id / default value returned by c.params
 	if userId == "" {
 		return c.SendStatus(400)
 	}
-	orderId := c.Params("order_id")
+	orderId := c.Params("orderId")
 	// Invalid id / default value returned by c.params
 	if orderId == "" {
 		return c.SendStatus(400)
@@ -80,7 +79,7 @@ func GetOrderPayment(c *fiber.Ctx) error {
 }
 
 func AddFunds(c *fiber.Ctx) error {
-	userId := c.Params("user_id")
+	userId := c.Params("userId")
 	// Invalid id / default value returned by c.params
 	if userId == "" {
 		return c.SendStatus(400)
@@ -122,7 +121,7 @@ func CreatePaymentUser(c *fiber.Ctx) error {
 }
 
 func GetUser(c *fiber.Ctx) error {
-	userId := c.Params("user_id")
+	userId := c.Params("userId")
 
 	// Invalid id / default value returned by c.params
 	if userId == "" {

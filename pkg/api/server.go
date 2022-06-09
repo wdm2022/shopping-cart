@@ -36,7 +36,7 @@ func bindPaymentApi(app *fiber.App) {
 	payment.Get("/status/:userId/:orderId", handlers.GetOrderPayment)
 	payment.Post("/add_funds/:userId/:amount", handlers.AddFunds)
 	payment.Post("/create_user", handlers.CreatePaymentUser)
-	payment.Get("/find_user/:user_id", handlers.GetUser)
+	payment.Get("/find_user/:userId", handlers.GetUser)
 }
 
 func bindKubernetesApi(app *fiber.App) {
