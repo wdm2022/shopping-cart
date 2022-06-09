@@ -7,6 +7,10 @@ services:
       target: api-gateway
     ports:
       - "127.0.0.1:8080:8080"
+    environment:
+      ORDER_SERVICE_ADDRESS: "order-service:50000"
+      PAYMENT_SERVICE_ADDRESS: "payment-service:50001"
+      STOCK_SERVICE_ADDRESS: "stock-service:50002"
   order-service:
     restart: on-failure
     build:
@@ -18,6 +22,8 @@ services:
       MONGO_USERNAME: "order"
       MONGO_PASSWORD: "password"
       MONGO_DATABASE: "order"
+      STOCK_SERVICE_ADDRESS: "stock-service:50002"
+      PAYMENT_SERVICE_ADDRESS: "payment-service:50001"
   payment-service:
     restart: on-failure
     build:
@@ -29,6 +35,8 @@ services:
       MONGO_USERNAME: "payment"
       MONGO_PASSWORD: "password"
       MONGO_DATABASE: "payment"
+      ORDER_SERVICE_ADDRESS: "order-service:50000"
+      STOCK_SERVICE_ADDRESS: "stock-service:50002"
   stock-service:
     restart: on-failure
     build:
@@ -40,3 +48,5 @@ services:
       MONGO_USERNAME: "stock"
       MONGO_PASSWORD: "password"
       MONGO_DATABASE: "stock"
+      ORDER_SERVICE_ADDRESS: "order-service:50000"
+      PAYMENT_SERVICE_ADDRESS: "stock-service:50001"
