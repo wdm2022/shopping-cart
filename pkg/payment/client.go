@@ -63,3 +63,9 @@ func FindUser(request *paymentApi.FindUserRequest) (*paymentApi.FindUserResponse
 	defer cel()
 	return client.FindUser(ctx, request)
 }
+
+func Rollback(request *paymentApi.RollbackRequest) (*paymentApi.EmptyMessage, error) {
+	ctx, cel := createContext()
+	defer cel()
+	return client.Rollback(ctx, request)
+}

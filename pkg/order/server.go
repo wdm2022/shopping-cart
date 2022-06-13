@@ -137,7 +137,12 @@ func (o orderServer) Checkout(ctx context.Context, in *orderApi.CheckoutRequest)
 
 	// Remove items in the order from stock
 	_, stockErr2 := stock.SubtractBatch(&stockApi.SubtractBatchRequest{TxId: txId, ItemIds: itemIds})
-	if payErr != nil {
+	if stockErr2 != nil {
+		// Something went wrong while subtracting the batch, payment has to be reverted
+		_, rollbackErr := payment.Rollback(&paymentApi.RollbackRequest{TxId: txId})
+		if rollbackErr != nil {
+			stockErr2 = rollbackErr
+		}
 		return nil, stockErr2
 	}
 

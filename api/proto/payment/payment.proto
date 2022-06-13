@@ -11,6 +11,7 @@ service Payment {
   rpc AddFunds (AddFundsRequest) returns (AddFundsResponse) {}
   rpc CreateUser (EmptyMessage) returns (CreateUserResponse) {}
   rpc FindUser (FindUserRequest) returns (FindUserResponse) {}
+  rpc Rollback (RollbackRequest) returns (EmptyMessage) {}
 }
 
 
@@ -56,6 +57,10 @@ message FindUserRequest {
 message FindUserResponse {
   string userId = 1;
   int64 credits = 2;
+}
+
+message RollbackRequest {
+  string txId = 1;
 }
 
 

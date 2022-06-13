@@ -93,6 +93,18 @@ func (o paymentServer) FindUser(ctx context.Context, in *paymentApi.FindUserRequ
 	return &paymentApi.FindUserResponse{UserId: in.UserId, Credits: user.Credit}, nil
 }
 
+func (o paymentServer) Rollback(ctx context.Context, in *paymentApi.RollbackRequest) (*paymentApi.EmptyMessage, error) {
+	fmt.Println("Received a rollback request: ", in.TxId)
+
+	// TODO: Rollback transactions with the given transaction ID # Rahim
+	//user, err := o.paymentConn.FindUser(in.UserId)
+	//if err != nil {
+	//	return nil, err
+	//}
+
+	return &paymentApi.EmptyMessage{}, nil
+}
+
 func RunGrpcServer(client *mongo.Client, port *int) error {
 	lis, err := net.Listen("tcp", fmt.Sprintf(":%d", *port))
 	if err != nil {
