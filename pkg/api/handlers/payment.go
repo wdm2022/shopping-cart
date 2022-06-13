@@ -1,9 +1,12 @@
 package handlers
 
 import (
-	"github.com/gofiber/fiber/v2"
+	"fmt"
 	paymentApi "shopping-cart/api/proto/payment"
 	"shopping-cart/pkg/payment"
+	"strconv"
+
+	"github.com/gofiber/fiber/v2"
 )
 
 func PlaceOrderPayment(c *fiber.Ctx) error {
@@ -18,10 +21,12 @@ func PlaceOrderPayment(c *fiber.Ctx) error {
 		return c.SendStatus(400)
 	}
 
-	amount, err := c.ParamsInt("amount")
+	amountStr := c.Params("amount")
+	amount, err := strconv.ParseFloat(amountStr, 64)
 	if err != nil {
 		return err
 	}
+	amount *= 100
 
 	_, err = payment.Pay(&paymentApi.PayRequest{UserId: userId, OrderId: orderId, Amount: int64(amount)})
 
@@ -85,19 +90,26 @@ func AddFunds(c *fiber.Ctx) error {
 	if userId == "" {
 		return c.SendStatus(400)
 	}
-	amount, err := c.ParamsInt("amount")
+	amountStr := c.Params("amount")
+	amount, err := strconv.ParseFloat(amountStr, 64)
 	if err != nil {
+		logger := c.App().Server().Logger
+		logger.Printf("error opening file: %v", err)
 		return err
 	}
-
+	amount *= 100
 	response, err := payment.AddFunds(&paymentApi.AddFundsRequest{UserId: userId, Amount: int64(amount)})
 
 	if err != nil {
+		logger := c.App().Server().Logger
+		logger.Printf("error opening file: %v", err)
 		return c.SendStatus(400)
 	}
 
 	err = c.SendStatus(200)
 	if err != nil {
+		logger := c.App().Server().Logger
+		logger.Printf("error opening file: %v", err)
 		return err
 	}
 	return c.JSON(fiber.Map{
@@ -139,8 +151,9 @@ func GetUser(c *fiber.Ctx) error {
 	if err != nil {
 		return err
 	}
+	floatCredits := fmt.Sprintf("%f", float64(response.Credits)/100.0)
 	return c.JSON(fiber.Map{
 		"user_id": response.UserId,
-		"credit":  response.Credits,
+		"credit":  floatCredits,
 	})
 }

@@ -1,9 +1,12 @@
 package handlers
 
 import (
-	"github.com/gofiber/fiber/v2"
+	"fmt"
 	stockApi "shopping-cart/api/proto/stock"
 	"shopping-cart/pkg/stock"
+	"strconv"
+
+	"github.com/gofiber/fiber/v2"
 )
 
 func GetStock(c *fiber.Ctx) error {
@@ -25,9 +28,10 @@ func GetStock(c *fiber.Ctx) error {
 	if err != nil {
 		return err
 	}
+	floatPrice := fmt.Sprintf("%f", float64(response.Price)/100.0)
 	return c.JSON(fiber.Map{
 		"stock": response.Stock,
-		"price": response.Price,
+		"price": floatPrice,
 	})
 }
 
@@ -74,11 +78,12 @@ func AddStock(c *fiber.Ctx) error {
 }
 
 func CreateItem(c *fiber.Ctx) error {
-	// TODO: Check whether price has to be a float or can be an integer
-	price, err := c.ParamsInt("price")
+	priceStr := c.Params("price")
+	price, err := strconv.ParseFloat(priceStr, 64)
 	if err != nil {
 		return err
 	}
+	price *= 100
 
 	response, err := stock.Create(&stockApi.CreateRequest{Price: int64(price)})
 

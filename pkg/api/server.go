@@ -2,10 +2,11 @@ package api
 
 import (
 	"fmt"
+	"shopping-cart/pkg/api/handlers"
+
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/logger"
 	"github.com/gofiber/fiber/v2/middleware/recover"
-	"shopping-cart/pkg/api/handlers"
 )
 
 func bindOrdersApi(app *fiber.App) {

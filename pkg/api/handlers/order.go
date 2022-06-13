@@ -2,9 +2,10 @@ package handlers
 
 import (
 	"fmt"
-	"github.com/gofiber/fiber/v2"
 	orderApi "shopping-cart/api/proto/order"
 	"shopping-cart/pkg/order"
+
+	"github.com/gofiber/fiber/v2"
 )
 
 // TODO: This is not a function belonging to the Order, it should be in payment
@@ -52,12 +53,13 @@ func GetOrder(c *fiber.Ctx) error {
 		response.ItemIds = []string{}
 	}
 
+	floatTotalCost := fmt.Sprintf("%f", float64(response.TotalCost)/100.0)
 	return c.JSON(fiber.Map{
 		"order_id":   response.OrderId,
 		"paid":       response.Paid,
 		"items":      response.ItemIds,
 		"user_id":    response.UserId,
-		"total_cost": response.TotalCost,
+		"total_cost": floatTotalCost,
 	})
 }
 
