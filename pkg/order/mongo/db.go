@@ -3,6 +3,7 @@ package mongo
 import (
 	"context"
 	"errors"
+	sf "github.com/sa-/slicefunk"
 	"shopping-cart/pkg/db"
 	"shopping-cart/pkg/utils"
 
@@ -195,18 +196,15 @@ func (orderConn *OrdersConnection) EndTransaction(txId string) error {
 	ctx, cancel := utils.ContextWithTimeOut()
 	defer cancel()
 
-	query := bson.D{
-		primitive.E{
-			Key:   "_id", //todo txid
-			Value: objTxId,
-		},
+	query := primitive.M{
+		"_id": objTxId,
 	}
 
 	//todo don't use literals
-	update := bson.D{{
-		Key:   "status",
-		Value: "done",
-	}}
+	update := primitive.M{
+		"$set": primitive.M{
+			"status": "done",
+		}}
 
 	_, err = orderConn.LogCollection.UpdateOne(ctx, query, update)
 	if err != nil {
@@ -246,6 +244,34 @@ func (orderConn *OrdersConnection) RevertTransaction(txId string) error {
 
 	return nil
 
+}
+
+func (orderConn *OrdersConnection) FindOpenTransactions() ([]primitive.ObjectID, error) {
+
+	ctx, cancel := utils.ContextWithTimeOut()
+	defer cancel()
+	query := bson.D{
+		primitive.E{
+			Key:   "status",
+			Value: "started",
+		},
+	}
+
+	res, _ := orderConn.LogCollection.Find(ctx, query)
+
+	if res.Err() != nil {
+		return nil, res.Err()
+	}
+	var results []Log
+
+	err := res.All(ctx, &results)
+	if err != nil {
+		return nil, err
+	}
+
+	return sf.Map(results, func(t Log) primitive.ObjectID {
+		return t.TxId
+	}), nil
 }
 
 /*

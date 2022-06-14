@@ -144,3 +144,23 @@ func CreateOrder(c *fiber.Ctx) error {
 		"order_id": response.OrderId,
 	})
 }
+
+func Checkout(c *fiber.Ctx) error {
+	orderId := c.Params("orderId")
+
+	// Invalid id / default value returned by c.params
+	if orderId == "" {
+		return c.SendStatus(400)
+	}
+	_, err := order.Checkout(&orderApi.CheckoutRequest{OrderId: orderId})
+
+	if err != nil {
+		return c.SendStatus(400)
+	}
+
+	err = c.SendStatus(200)
+	if err != nil {
+		return err
+	}
+	return nil
+}

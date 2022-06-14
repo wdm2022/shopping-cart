@@ -3,6 +3,7 @@ package mongo
 import (
 	"context"
 	"errors"
+	"log"
 	"shopping-cart/pkg/db"
 	"shopping-cart/pkg/utils"
 
@@ -43,6 +44,7 @@ func (p *PaymentConnection) CreateUser() (string, error) {
 	user := User{
 		UserId: primitive.NewObjectID(),
 		Credit: 0,
+		Orders: &[]Order{},
 	}
 
 	res, err := p.PaymentCollection.InsertOne(context.Background(), user)
@@ -124,7 +126,7 @@ func (p *PaymentConnection) PayOrder(txId string, userId string, orderId string,
 	if err != nil {
 		return false, err
 	}
-	objUserId, err := primitive.ObjectIDFromHex(orderId)
+	objUserId, err := primitive.ObjectIDFromHex(userId)
 	if err != nil {
 		return false, err
 	}
@@ -141,6 +143,7 @@ func (p *PaymentConnection) PayOrder(txId string, userId string, orderId string,
 			if logRes.Err() == mongo.ErrNoDocuments {
 				// we have not handled this yet
 			} else if logRes.Err() != nil {
+				log.Println("Error when finding log ", logRes.Err())
 				return false, logRes.Err()
 			} else {
 				//we have handled this
@@ -148,23 +151,36 @@ func (p *PaymentConnection) PayOrder(txId string, userId string, orderId string,
 			}
 		}
 		// find user that doesn't have this order, so we haven't paid it yet
-		query := bson.D{
-			{
-				userId, objUserId,
-			},
-			{Key: Orders, Value: primitive.E{
-				Key: "$not",
-				Value: primitive.E{
-					Key: "$eq",
-					Value: primitive.E{
-						Key:   OrderId,
-						Value: objOrderId,
+		query := primitive.M{
+			UserId: objUserId,
+			Orders: primitive.M{
+				"$not": primitive.M{
+					"$all": primitive.A{
+						primitive.M{
+							OrderId:   objOrderId,
+							OrderPaid: true,
+						},
 					},
 				},
-			}},
+			},
+			//{Key: Orders, Value: primitive.E{
+			//	Key: "$not",
+			//	Value: primitive.E{
+			//		Key: "$all",
+			//		Value: primitive.A{
+			//			primitive.D{
+			//				primitive.E{
+			//					Key:   OrderId,
+			//					Value: objOrderId,
+			//				},
+			//			},
+			//		},
+			//	},
+			//}},
 		}
 		res := p.PaymentCollection.FindOne(sessCtx, query)
 		if res.Err() != nil {
+			log.Println("error when finding user ", res.Err())
 			return false, res.Err()
 		}
 		user := &User{}
@@ -174,21 +190,18 @@ func (p *PaymentConnection) PayOrder(txId string, userId string, orderId string,
 		}
 		newAmount := user.Credit - amount
 		if newAmount < 0 {
+			log.Println("insufficient credit")
 			return false, errors.New("not sufficient credit")
 		}
-		decFunc := bson.D{
-			primitive.E{Key: "$push", Value: primitive.E{
-				Key:   Orders,
-				Value: objOrderId,
-			}},
-			primitive.E{
-				Key: "$inc",
-				Value: bson.D{
-					primitive.E{
-						Key:   Credit,
-						Value: 0 - (amount),
-					},
+		decFunc := bson.M{
+			"$push": primitive.M{
+				Orders: primitive.M{
+					OrderId:   objOrderId,
+					OrderPaid: true,
 				},
+			},
+			"$inc": primitive.M{
+				Credit: 0 - amount,
 			},
 		}
 
@@ -223,6 +236,7 @@ func (p *PaymentConnection) PayOrder(txId string, userId string, orderId string,
 
 	session, err := p.Client.StartSession()
 	if err != nil {
+		log.Println("error when starting session ", err)
 		return false, err
 	}
 	defer session.EndSession(ctx)
