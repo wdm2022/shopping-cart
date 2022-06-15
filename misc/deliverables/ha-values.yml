@@ -1,0 +1,20 @@
+apiGateway:
+  replicaCount: 3
+
+orderService:
+  replicaCount: 3
+
+paymentService:
+  replicaCount: 3
+
+stockService:
+  replicaCount: 3
+
+mongodb-order:
+  replicaCount: 2
+
+mongodb-payment:
+  replicaCount: 2
+
+mongodb-stock:
+  replicaCount: 2
