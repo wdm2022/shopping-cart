@@ -13,8 +13,8 @@
   export SERVICE_IP=$(kubectl get svc --namespace {{ .Release.Namespace }} {{ include "shopping-cart.apiGateway.fullname" . }} --template "{{"{{ range (index .status.loadBalancer.ingress 0) }}{{.}}{{ end }}"}}")
   echo http://$SERVICE_IP:{{ .Values.apiGateway.service.port }}
 {{- else if contains "ClusterIP" .Values.apiGateway.service.type }}
-  export POD_NAME=$(kubectl get pods --namespace {{ .Release.Namespace }} -l "app.kubernetes.io/name={{ include "shopping-cart.name" . }},app.kubernetes.io/instance={{ .Release.Name }},shopping-cart/service=api-gateway" -o jsonpath="{.items[0].metadata.name}")
-  export CONTAINER_PORT=$(kubectl get pod --namespace {{ .Release.Namespace }} $POD_NAME -o jsonpath="{.spec.containers[0].ports[0].containerPort}")
-  echo "Visit http://127.0.0.1:8080 to use your application"
-  kubectl --namespace {{ .Release.Namespace }} port-forward $POD_NAME 8080:$CONTAINER_PORT
+  export SERVICE_NAME=$(kubectl get services --namespace {{ .Release.Namespace }} -l "app.kubernetes.io/name={{ include "shopping-cart.name" . }},app.kubernetes.io/instance={{ .Release.Name }},shopping-cart/service=api-gateway" -o jsonpath="{.items[0].metadata.name}")
+  export SERVICE_PORT=$(kubectl get service --namespace {{ .Release.Namespace }} $SERVICE_NAME -o jsonpath="{.spec.ports[0].port}")
+  echo "Visit http://127.0.0.1:8080 to access API gateway"
+  kubectl --namespace {{ .Release.Namespace }} port-forward svc/$SERVICE_NAME 8080:$SERVICE_PORT
 {{- end }}

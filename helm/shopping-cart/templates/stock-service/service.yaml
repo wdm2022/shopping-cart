@@ -3,7 +3,7 @@ kind: Service
 metadata:
   name: {{ include "shopping-cart.stockService.fullname" . }}
   labels:
-    {{- include "shopping-cart.labels" . | nindent 4 }}
+    {{- include "shopping-cart.stockService.selectorLabels" . | nindent 4 }}
 spec:
   type: {{ .Values.stockService.service.type }}
   ports:
