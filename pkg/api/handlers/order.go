@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"fmt"
+	"log"
 	orderApi "shopping-cart/api/proto/order"
 	"shopping-cart/pkg/order"
 
@@ -18,9 +19,9 @@ func CreateUser(c *fiber.Ctx) error {
 	}
 
 	response, err := order.CreateOrder(&orderApi.CreateOrderRequest{UserId: userId})
-
 	if err != nil {
-		return c.SendStatus(400)
+		log.Printf("Error when executing CreateOrder: %v", err)
+		return c.Status(fiber.StatusBadRequest).SendString(err.Error())
 	}
 
 	return c.JSON(fiber.Map{
@@ -37,12 +38,12 @@ func GetOrder(c *fiber.Ctx) error {
 	}
 
 	response, err := order.GetOrder(&orderApi.GetOrderRequest{OrderId: orderId})
-
 	if err != nil {
-		return c.SendStatus(400)
+		log.Printf("Error when executing GetOrder: %v", err)
+		return c.Status(fiber.StatusBadRequest).SendString(err.Error())
 	}
 
-	err = c.SendStatus(200)
+	err = c.SendStatus(fiber.StatusOK)
 	if err != nil {
 		return err
 	}
@@ -77,9 +78,9 @@ func AddItem(c *fiber.Ctx) error {
 	}
 
 	_, err := order.AddItem(&orderApi.AddItemRequest{OrderId: orderId, ItemId: itemId})
-
 	if err != nil {
-		return c.SendStatus(fiber.StatusBadRequest)
+		log.Printf("Error when executing AddItem: %v", err)
+		return c.Status(fiber.StatusBadRequest).SendString(err.Error())
 	}
 
 	return c.SendStatus(fiber.StatusOK)
@@ -99,9 +100,9 @@ func DeleteItem(c *fiber.Ctx) error {
 	}
 
 	_, err := order.RemoveItem(&orderApi.RemoveItemRequest{OrderId: orderId, ItemId: itemId})
-
 	if err != nil {
-		return c.SendStatus(fiber.StatusBadRequest)
+		log.Printf("Error when executing RemoveItem: %v", err)
+		return c.Status(fiber.StatusBadRequest).SendString(err.Error())
 	}
 
 	return c.SendStatus(fiber.StatusOK)
@@ -116,9 +117,9 @@ func DeleteOrder(c *fiber.Ctx) error {
 	}
 
 	_, err := order.RemoveOrder(&orderApi.RemoveOrderRequest{OrderId: orderId})
-
 	if err != nil {
-		return c.SendStatus(fiber.StatusBadRequest)
+		log.Printf("Error when executing RemoveOrder: %v", err)
+		return c.Status(fiber.StatusBadRequest).SendString(err.Error())
 	}
 
 	return c.SendStatus(fiber.StatusOK)
@@ -133,12 +134,12 @@ func CreateOrder(c *fiber.Ctx) error {
 	}
 
 	response, err := order.CreateOrder(&orderApi.CreateOrderRequest{UserId: userId})
-
 	if err != nil {
-		return c.SendStatus(400)
+		log.Printf("Error when executing CreateOrder: %v", err)
+		return c.Status(fiber.StatusBadRequest).SendString(err.Error())
 	}
 
-	err = c.SendStatus(200)
+	err = c.SendStatus(fiber.StatusOK)
 	if err != nil {
 		return err
 	}
@@ -156,9 +157,9 @@ func Checkout(c *fiber.Ctx) error {
 	}
 
 	_, err := order.Checkout(&orderApi.CheckoutRequest{OrderId: orderId})
-
 	if err != nil {
-		return c.SendStatus(fiber.StatusBadRequest)
+		log.Printf("Error when executing Checkout: %v", err)
+		return c.Status(fiber.StatusBadRequest).SendString(err.Error())
 	}
 
 	return c.SendStatus(fiber.StatusOK)

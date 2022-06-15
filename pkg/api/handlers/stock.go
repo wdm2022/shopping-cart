@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"fmt"
+	"log"
 	stockApi "shopping-cart/api/proto/stock"
 	"shopping-cart/pkg/stock"
 	"strconv"
@@ -19,19 +20,14 @@ func GetStock(c *fiber.Ctx) error {
 	}
 
 	response, err := stock.Find(&stockApi.FindRequest{ItemId: itemId})
-
 	if err != nil {
-		return c.SendStatus(400)
+		log.Printf("Error when executing Find: %v", err)
+		return c.Status(fiber.StatusBadRequest).SendString(err.Error())
 	}
 
-	err = c.SendStatus(200)
-	if err != nil {
-		return err
-	}
-	floatPrice := fmt.Sprintf("%f", float64(response.Price)/100.0)
 	return c.JSON(fiber.Map{
 		"stock": response.Stock,
-		"price": floatPrice,
+		"price": fmt.Sprintf("%f", float64(response.Price)/100.0),
 	})
 }
 
@@ -48,12 +44,12 @@ func SubtractStock(c *fiber.Ctx) error {
 	}
 
 	_, err = stock.Subtract(&stockApi.SubtractRequest{ItemId: itemId, Amount: int64(amount)})
-
 	if err != nil {
-		return c.SendStatus(400)
+		log.Printf("Error when executing Subtract: %v", err)
+		return c.Status(fiber.StatusBadRequest).SendString(err.Error())
 	}
 
-	return c.SendStatus(200)
+	return c.SendStatus(fiber.StatusOK)
 }
 
 func AddStock(c *fiber.Ctx) error {
@@ -69,12 +65,12 @@ func AddStock(c *fiber.Ctx) error {
 	}
 
 	_, err = stock.Add(&stockApi.AddRequest{ItemId: itemId, Amount: int64(amount)})
-
 	if err != nil {
-		return c.SendStatus(400)
+		log.Printf("Error when executing Add: %v", err)
+		return c.Status(fiber.StatusBadRequest).SendString(err.Error())
 	}
 
-	return c.SendStatus(200)
+	return c.SendStatus(fiber.StatusOK)
 }
 
 func CreateItem(c *fiber.Ctx) error {
@@ -86,15 +82,11 @@ func CreateItem(c *fiber.Ctx) error {
 	price *= 100
 
 	response, err := stock.Create(&stockApi.CreateRequest{Price: int64(price)})
-
 	if err != nil {
-		return c.SendStatus(400)
+		log.Printf("Error when executing Create: %v", err)
+		return c.Status(fiber.StatusBadRequest).SendString(err.Error())
 	}
 
-	err = c.SendStatus(200)
-	if err != nil {
-		return err
-	}
 	return c.JSON(fiber.Map{
 		"item_id": response.ItemId,
 	})
