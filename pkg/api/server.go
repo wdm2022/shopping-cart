@@ -12,30 +12,30 @@ import (
 func bindOrdersApi(app *fiber.App) {
 	orders := app.Group("/orders")
 
-	orders.Post("/create/:userId", handlers.CreateOrder)
-	orders.Delete("/remove/:orderId", handlers.DeleteOrder)
-	orders.Get("/find/:orderId", handlers.GetOrder)
-	orders.Post("/addItem/:orderId/:itemId", handlers.AddItem)
-	orders.Delete("/removeItem/:orderId/:itemId", handlers.DeleteItem)
-	orders.Post("/checkout/:orderId", handlers.Checkout)
+	orders.Post("/create/:user_id", handlers.CreateOrder)
+	orders.Delete("/remove/:order_id", handlers.DeleteOrder)
+	orders.Get("/find/:order_id", handlers.GetOrder)
+	orders.Post("/addItem/:order_id/:item_id", handlers.AddItem)
+	orders.Delete("/removeItem/:order_id/:item_id", handlers.DeleteItem)
+	orders.Post("/checkout/:order_id", handlers.Checkout)
 }
 
 func bindStockApi(app *fiber.App) {
 	stock := app.Group("/stock")
 
-	stock.Get("/find/:itemId", handlers.GetStock)
-	stock.Post("/subtract/:itemId/:amount", handlers.SubtractStock)
-	stock.Post("/add/:itemId/:amount", handlers.AddStock)
+	stock.Get("/find/:item_id", handlers.GetStock)
+	stock.Post("/subtract/:item_id/:amount", handlers.SubtractStock)
+	stock.Post("/add/:item_id/:amount", handlers.AddStock)
 	stock.Post("/item/create/:price", handlers.CreateItem)
 }
 
 func bindPaymentApi(app *fiber.App) {
 	payment := app.Group("/payment")
 
-	payment.Post("/pay/:userId/:orderId/:amount", handlers.PlaceOrderPayment)
-	payment.Post("/cancel/:userId/:orderId", handlers.CancelOrderPayment)
-	payment.Get("/status/:userId/:orderId", handlers.GetOrderPayment)
-	payment.Post("/add_funds/:userId/:amount", handlers.AddFunds)
+	payment.Post("/pay/:user_id/:order_id/:amount", handlers.PlaceOrderPayment)
+	payment.Post("/cancel/:user_id/:order_id", handlers.CancelOrderPayment)
+	payment.Get("/status/:user_id/:order_id", handlers.GetOrderPayment)
+	payment.Post("/add_funds/:user_id/:amount", handlers.AddFunds)
 	payment.Post("/create_user", handlers.CreatePaymentUser)
 	payment.Get("/find_user/:user_id", handlers.GetUser)
 }
