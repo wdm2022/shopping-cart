@@ -3,7 +3,7 @@ kind: Service
 metadata:
   name: {{ include "shopping-cart.apiGateway.fullname" . }}
   labels:
-    {{- include "shopping-cart.labels" . | nindent 4 }}
+    {{- include "shopping-cart.apiGateway.selectorLabels" . | nindent 4 }}
 spec:
   type: {{ .Values.apiGateway.service.type }}
   ports:
