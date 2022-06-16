@@ -69,4 +69,3 @@ message PingResponse {
   string message = 1;
 }
 message EmptyMessage {}
-

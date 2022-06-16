@@ -2,14 +2,16 @@ package handlers
 
 import (
 	"fmt"
-	"github.com/gofiber/fiber/v2"
+	"log"
 	orderApi "shopping-cart/api/proto/order"
 	"shopping-cart/pkg/order"
+
+	"github.com/gofiber/fiber/v2"
 )
 
 // TODO: This is not a function belonging to the Order, it should be in payment
 func CreateUser(c *fiber.Ctx) error {
-	userId := c.Params("userId")
+	userId := c.Params("user_id")
 
 	// Invalid id / default value returned by c.params
 	if userId == "" {
@@ -17,18 +19,18 @@ func CreateUser(c *fiber.Ctx) error {
 	}
 
 	response, err := order.CreateOrder(&orderApi.CreateOrderRequest{UserId: userId})
-
 	if err != nil {
-		return c.SendStatus(400)
+		log.Printf("Error when executing CreateOrder: %v", err)
+		return c.Status(fiber.StatusBadRequest).SendString(err.Error())
 	}
 
 	return c.JSON(fiber.Map{
-		"userId": response.OrderId,
+		"user_id": response.OrderId,
 	})
 }
 
 func GetOrder(c *fiber.Ctx) error {
-	orderId := c.Params("orderId")
+	orderId := c.Params("order_id")
 
 	// Invalid id / default value returned by c.params
 	if orderId == "" {
@@ -36,12 +38,12 @@ func GetOrder(c *fiber.Ctx) error {
 	}
 
 	response, err := order.GetOrder(&orderApi.GetOrderRequest{OrderId: orderId})
-
 	if err != nil {
-		return c.SendStatus(400)
+		log.Printf("Error when executing GetOrder: %v", err)
+		return c.Status(fiber.StatusBadRequest).SendString(err.Error())
 	}
 
-	err = c.SendStatus(200)
+	err = c.SendStatus(fiber.StatusOK)
 	if err != nil {
 		return err
 	}
@@ -52,61 +54,62 @@ func GetOrder(c *fiber.Ctx) error {
 		response.ItemIds = []string{}
 	}
 
+	floatTotalCost := fmt.Sprintf("%f", float64(response.TotalCost)/100.0)
 	return c.JSON(fiber.Map{
 		"order_id":   response.OrderId,
 		"paid":       response.Paid,
 		"items":      response.ItemIds,
 		"user_id":    response.UserId,
-		"total_cost": response.TotalCost,
+		"total_cost": floatTotalCost,
 	})
 }
 
 func AddItem(c *fiber.Ctx) error {
-	orderId := c.Params("orderId")
+	orderId := c.Params("order_id")
 	// Invalid id / default value returned by c.params
 	if orderId == "" {
 		return c.SendStatus(fiber.StatusBadRequest)
 	}
 
-	itemId := c.Params("itemId")
+	itemId := c.Params("item_id")
 	// Invalid id / default value returned by c.params
 	if itemId == "" {
 		return c.SendStatus(fiber.StatusBadRequest)
 	}
 
 	_, err := order.AddItem(&orderApi.AddItemRequest{OrderId: orderId, ItemId: itemId})
-
 	if err != nil {
-		return c.SendStatus(fiber.StatusBadRequest)
+		log.Printf("Error when executing AddItem: %v", err)
+		return c.Status(fiber.StatusBadRequest).SendString(err.Error())
 	}
 
 	return c.SendStatus(fiber.StatusOK)
 }
 
 func DeleteItem(c *fiber.Ctx) error {
-	orderId := c.Params("orderId")
+	orderId := c.Params("order_id")
 	// Invalid id / default value returned by c.params
 	if orderId == "" {
 		return c.SendStatus(fiber.StatusBadRequest)
 	}
 
-	itemId := c.Params("itemId")
+	itemId := c.Params("item_id")
 	// Invalid id / default value returned by c.params
 	if itemId == "" {
 		return c.SendStatus(fiber.StatusBadRequest)
 	}
 
 	_, err := order.RemoveItem(&orderApi.RemoveItemRequest{OrderId: orderId, ItemId: itemId})
-
 	if err != nil {
-		return c.SendStatus(fiber.StatusBadRequest)
+		log.Printf("Error when executing RemoveItem: %v", err)
+		return c.Status(fiber.StatusBadRequest).SendString(err.Error())
 	}
 
 	return c.SendStatus(fiber.StatusOK)
 }
 
 func DeleteOrder(c *fiber.Ctx) error {
-	orderId := c.Params("orderId")
+	orderId := c.Params("order_id")
 
 	// Invalid id / default value returned by c.params
 	if orderId == "" {
@@ -114,16 +117,16 @@ func DeleteOrder(c *fiber.Ctx) error {
 	}
 
 	_, err := order.RemoveOrder(&orderApi.RemoveOrderRequest{OrderId: orderId})
-
 	if err != nil {
-		return c.SendStatus(fiber.StatusBadRequest)
+		log.Printf("Error when executing RemoveOrder: %v", err)
+		return c.Status(fiber.StatusBadRequest).SendString(err.Error())
 	}
 
 	return c.SendStatus(fiber.StatusOK)
 }
 
 func CreateOrder(c *fiber.Ctx) error {
-	userId := c.Params("userId")
+	userId := c.Params("user_id")
 
 	// Invalid id / default value returned by c.params
 	if userId == "" {
@@ -131,12 +134,12 @@ func CreateOrder(c *fiber.Ctx) error {
 	}
 
 	response, err := order.CreateOrder(&orderApi.CreateOrderRequest{UserId: userId})
-
 	if err != nil {
-		return c.SendStatus(400)
+		log.Printf("Error when executing CreateOrder: %v", err)
+		return c.Status(fiber.StatusBadRequest).SendString(err.Error())
 	}
 
-	err = c.SendStatus(200)
+	err = c.SendStatus(fiber.StatusOK)
 	if err != nil {
 		return err
 	}
@@ -146,21 +149,18 @@ func CreateOrder(c *fiber.Ctx) error {
 }
 
 func Checkout(c *fiber.Ctx) error {
-	orderId := c.Params("orderId")
+	orderId := c.Params("order_id")
 
 	// Invalid id / default value returned by c.params
 	if orderId == "" {
 		return c.SendStatus(400)
 	}
+
 	_, err := order.Checkout(&orderApi.CheckoutRequest{OrderId: orderId})
-
 	if err != nil {
-		return c.SendStatus(400)
+		log.Printf("Error when executing Checkout: %v", err)
+		return c.Status(fiber.StatusBadRequest).SendString(err.Error())
 	}
 
-	err = c.SendStatus(200)
-	if err != nil {
-		return err
-	}
-	return nil
+	return c.SendStatus(fiber.StatusOK)
 }

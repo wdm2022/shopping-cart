@@ -6,7 +6,7 @@ apiGateway:
   replicaCount: 1
   image:
     repository: ghcr.io/wdm2022/shopping-cart/api-gateway
-    pullPolicy: Always
+    pullPolicy: IfNotPresent
     # Overrides the image tag whose default is the chart appVersion.
     tag: ""
   service:
@@ -64,7 +64,7 @@ orderService:
   replicaCount: 1
   image:
     repository: ghcr.io/wdm2022/shopping-cart/order-service
-    pullPolicy: Always
+    pullPolicy: IfNotPresent
     # Overrides the image tag whose default is the chart appVersion.
     tag: ""
   service:
@@ -110,7 +110,7 @@ paymentService:
   replicaCount: 1
   image:
     repository: ghcr.io/wdm2022/shopping-cart/payment-service
-    pullPolicy: Always
+    pullPolicy: IfNotPresent
     # Overrides the image tag whose default is the chart appVersion.
     tag: ""
   service:
@@ -156,7 +156,7 @@ stockService:
   replicaCount: 1
   image:
     repository: ghcr.io/wdm2022/shopping-cart/stock-service
-    pullPolicy: Always
+    pullPolicy: IfNotPresent
     # Overrides the image tag whose default is the chart appVersion.
     tag: ""
   service:
@@ -197,3 +197,69 @@ stockService:
   nodeSelector: {}
   tolerations: []
   affinity: {}
+
+mongodb-order:
+  architecture: "replicaset"
+  replicaSetName: "orderReplicaSet"
+  replicaCount: 1
+  auth:
+    rootPassword: "LoFiBeats"
+    usernames:
+      - order
+    passwords:
+      - password
+    databases:
+      - order
+  metrics:
+    enabled: false
+  # Increased probe period and timeouts for Minikube
+  readinessProbe:
+    periodSeconds: 120
+    timeoutSeconds: 60
+  livenessProbe:
+    periodSeconds: 120
+    timeoutSeconds: 60
+
+mongodb-payment:
+  architecture: "replicaset"
+  replicaSetName: "paymentReplicaSet"
+  replicaCount: 1
+  auth:
+    rootPassword: "LoFiBeats"
+    usernames:
+      - payment
+    passwords:
+      - password
+    databases:
+      - payment
+  metrics:
+    enabled: false
+  # Increased probe period and timeouts for Minikube
+  readinessProbe:
+    periodSeconds: 120
+    timeoutSeconds: 60
+  livenessProbe:
+    periodSeconds: 120
+    timeoutSeconds: 60
+
+mongodb-stock:
+  architecture: "replicaset"
+  replicaSetName: "stockReplicaSet"
+  replicaCount: 1
+  auth:
+    rootPassword: "LoFiBeats"
+    usernames:
+      - stock
+    passwords:
+      - password
+    databases:
+      - stock
+  metrics:
+    enabled: false
+  # Increased probe period and timeouts for Minikube
+  readinessProbe:
+    periodSeconds: 120
+    timeoutSeconds: 60
+  livenessProbe:
+    periodSeconds: 120
+    timeoutSeconds: 60

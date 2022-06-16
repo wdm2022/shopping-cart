@@ -57,6 +57,7 @@ func (o orderServer) GetOrder(ctx context.Context, in *orderApi.GetOrderRequest)
 
 	order, err := o.orderConn.FindOrder(in.OrderId)
 	if err != nil {
+		fmt.Println("err when getting total cost", err)
 		return nil, err
 	}
 
