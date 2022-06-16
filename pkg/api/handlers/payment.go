@@ -133,9 +133,12 @@ func GetUser(c *fiber.Ctx) error {
 		log.Printf("Error when executing FindUser: %v", err)
 		return c.Status(fiber.StatusBadRequest).SendString(err.Error())
 	}
-
+	float, err := strconv.ParseFloat(fmt.Sprintf("%f", float64(response.Credits)/100.0), 32)
+	if err != nil {
+		return err
+	}
 	return c.JSON(fiber.Map{
 		"user_id": response.UserId,
-		"credit":  fmt.Sprintf("%f", float64(response.Credits)/100.0),
+		"credit":  float,
 	})
 }

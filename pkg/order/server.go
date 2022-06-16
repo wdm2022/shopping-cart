@@ -135,14 +135,15 @@ func (o orderServer) Checkout(ctx context.Context, in *orderApi.CheckoutRequest)
 	// Process payment
 	_, payErr := payment.Pay(&paymentApi.PayRequest{TxId: txId, UserId: userId, OrderId: in.OrderId, Amount: totalCost.TotalCost})
 	if payErr != nil {
-		fmt.Println("could not pay", payErr)
+		fmt.Println("cost ", totalCost)
+		fmt.Println("could not pay", userId, payErr)
 		return nil, payErr
 	}
 
 	// Remove items in the order from stock
 	_, stockErr2 := stock.SubtractBatch(&stockApi.SubtractBatchRequest{TxId: txId, ItemIds: itemIds})
 	if stockErr2 != nil {
-		log.Println("could not subtract", stockErr2)
+		fmt.Println("could not subtract", stockErr2)
 		// Something went wrong while subtracting the batch, payment has to be reverted
 		_, rollbackErr := payment.Rollback(&paymentApi.RollbackRequest{TxId: txId})
 		if rollbackErr != nil {
