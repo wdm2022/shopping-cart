@@ -29,5 +29,5 @@ type Order struct {
 type User struct {
 	UserId primitive.ObjectID `bson:"_id"`
 	Credit int64              `bson:"credit"`
-	Orders []Order            `bson:"orders"`
+	Orders *[]Order           `bson:"orders"`
 }

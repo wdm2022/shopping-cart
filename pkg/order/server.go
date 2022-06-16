@@ -57,6 +57,7 @@ func (o orderServer) GetOrder(ctx context.Context, in *orderApi.GetOrderRequest)
 
 	order, err := o.orderConn.FindOrder(in.OrderId)
 	if err != nil {
+		fmt.Println("err when getting total cost", err)
 		return nil, err
 	}
 
@@ -108,6 +109,11 @@ func (o orderServer) Checkout(ctx context.Context, in *orderApi.CheckoutRequest)
 	// use random as an txid
 	txId := primitive.NewObjectID().Hex()
 
+	err := o.orderConn.StartTransaction(txId)
+	if err != nil {
+		return nil, err
+	}
+
 	// Get the order details from the db
 	order, orderErr := o.orderConn.FindOrder(in.OrderId)
 	userId := order.UserId.Hex()
@@ -115,25 +121,40 @@ func (o orderServer) Checkout(ctx context.Context, in *orderApi.CheckoutRequest)
 		return t.Hex()
 	})
 	if orderErr != nil {
+		log.Println("could not find order")
 		return nil, orderErr
 	}
 
 	// Calculate the total cost of the order
 	totalCost, stockErr := stock.TotalCost(&stockApi.TotalCostRequest{ItemIds: itemIds})
 	if stockErr != nil {
+		log.Println("could not calculate total cost")
 		return nil, stockErr
 	}
 
 	// Process payment
 	_, payErr := payment.Pay(&paymentApi.PayRequest{TxId: txId, UserId: userId, OrderId: in.OrderId, Amount: totalCost.TotalCost})
 	if payErr != nil {
+		fmt.Println("could not pay", payErr)
 		return nil, payErr
 	}
 
 	// Remove items in the order from stock
 	_, stockErr2 := stock.SubtractBatch(&stockApi.SubtractBatchRequest{TxId: txId, ItemIds: itemIds})
-	if payErr != nil {
+	if stockErr2 != nil {
+		log.Println("could not subtract", stockErr2)
+		// Something went wrong while subtracting the batch, payment has to be reverted
+		_, rollbackErr := payment.Rollback(&paymentApi.RollbackRequest{TxId: txId})
+		if rollbackErr != nil {
+			stockErr2 = rollbackErr
+		}
 		return nil, stockErr2
+	}
+
+	err = o.orderConn.EndTransaction(txId)
+	if err != nil {
+		log.Println("could not end tx ", err)
+		return nil, err
 	}
 
 	// TODO: add succes/fail error messages on return
@@ -147,6 +168,12 @@ func RunGrpcServer(client *mongo.Client, port *int) error {
 	}
 
 	orderConn := mongo2.Init(client)
+
+	transactions, err := orderConn.FindOpenTransactions()
+	if err != nil {
+		return err
+	}
+	fmt.Println(transactions)
 
 	server := grpc.NewServer()
 	orderApi.RegisterOrderServer(server, &orderServer{orderConn: orderConn})
