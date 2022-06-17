@@ -163,35 +163,9 @@ func (p *PaymentConnection) PayOrder(txId string, userId string, orderId string,
 					},
 				},
 			},
-			//{Key: Orders, Value: primitive.E{
-			//	Key: "$not",
-			//	Value: primitive.E{
-			//		Key: "$all",
-			//		Value: primitive.A{
-			//			primitive.D{
-			//				primitive.E{
-			//					Key:   OrderId,
-			//					Value: objOrderId,
-			//				},
-			//			},
-			//		},
-			//	},
-			//}},
-		}
-		res := p.PaymentCollection.FindOne(sessCtx, query)
-		if res.Err() != nil {
-			log.Println("error when finding user ", res.Err())
-			return false, res.Err()
-		}
-		user := &User{}
-		err = res.Decode(user)
-		if err != nil {
-			return false, err
-		}
-		newAmount := user.Credit - amount
-		if newAmount < 0 {
-			log.Println("insufficient credit")
-			return false, errors.New("not sufficient credit")
+			Credit: bson.M{
+				"$gte": amount,
+			},
 		}
 		decFunc := bson.M{
 			"$push": primitive.M{
@@ -203,6 +177,11 @@ func (p *PaymentConnection) PayOrder(txId string, userId string, orderId string,
 			"$inc": primitive.M{
 				Credit: 0 - amount,
 			},
+		}
+		res := p.PaymentCollection.FindOneAndUpdate(sessCtx, query, decFunc)
+		if res.Err() != nil {
+			log.Println("error when finding user and paying ", userId, " error ", res.Err())
+			return false, res.Err()
 		}
 
 		if txId != emptyHex {
@@ -218,19 +197,6 @@ func (p *PaymentConnection) PayOrder(txId string, userId string, orderId string,
 				return false, err
 			}
 		}
-
-		updateRes, err := p.PaymentCollection.UpdateOne(sessCtx, query, decFunc)
-
-		//todo should we check for all of this?
-		if err != nil {
-			return false, err
-		}
-		if updateRes.ModifiedCount > 1 {
-			return false, errors.New("updated multiple documents")
-		}
-		if updateRes.ModifiedCount == 0 {
-			return false, errors.New("updated 0 documents")
-		}
 		return true, nil
 	}
 
@@ -244,6 +210,65 @@ func (p *PaymentConnection) PayOrder(txId string, userId string, orderId string,
 	result, err := session.WithTransaction(ctx, callBack)
 
 	return result.(bool), err
+}
+
+func (p *PaymentConnection) Rollback(txId string) error {
+	objTxId, err := primitive.ObjectIDFromHex(txId)
+	if err != nil {
+		return err
+	}
+
+	ctx, cancel := utils.ContextWithTimeOut()
+	defer cancel()
+	callBack := func(sessCtx mongo.SessionContext) (interface{}, error) {
+
+		query := bson.M{
+			LogId: objTxId,
+			Status: bson.M{
+				"$ne": "reverted",
+			},
+		}
+		update := bson.M{
+			"$set": bson.M{
+				Status: "reverted",
+			},
+		}
+		logRes := p.LogCollection.FindOneAndUpdate(sessCtx, query, update)
+		if logRes.Err() != nil {
+			return nil, logRes.Err()
+		}
+		payLog := &Log{}
+		err := logRes.Decode(payLog)
+		if err != nil {
+			return nil, err
+		}
+
+		query = bson.M{
+			"_id": payLog.UserId,
+		}
+		update = bson.M{
+			"$inc": bson.M{
+				Credit: payLog.Amount,
+			},
+			"$pull": bson.M{
+				"orders": bson.M{"order_id": payLog.TxId},
+			},
+		}
+
+		p.PaymentCollection.FindOneAndUpdate(sessCtx, query, update)
+
+		return nil, nil
+	}
+	session, err := p.Client.StartSession()
+	if err != nil {
+		log.Println("error when starting session ", err)
+		return err
+	}
+	defer session.EndSession(ctx)
+
+	_, err = session.WithTransaction(ctx, callBack)
+
+	return err
 }
 
 func (p *PaymentConnection) CancelOrder(userId string, orderId string) error {

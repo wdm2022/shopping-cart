@@ -97,7 +97,10 @@ func (o paymentServer) Rollback(ctx context.Context, in *paymentApi.RollbackRequ
 	fmt.Println("Received a rollback request: ", in.TxId)
 
 	// TODO: Rollback transactions with the given transaction ID # Rahim
-	//user, err := o.paymentConn.FindUser(in.UserId)
+	err := o.paymentConn.Rollback(in.TxId)
+	if err != nil {
+		return nil, err
+	}
 	//if err != nil {
 	//	return nil, err
 	//}

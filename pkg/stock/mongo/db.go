@@ -256,22 +256,12 @@ func (o *StockConnection) SubtractBatchStock(txId string, itemIds []string) erro
 
 		//todo How do to all of this in one call to database.
 		for _, id := range objIds {
-			query := bson.M{"_id": id}
-			add := bson.D{
-				primitive.E{
-					Key: "$inc",
-					Value: bson.D{
-						primitive.E{
-							Key:   StockAmount,
-							Value: 0 - amounts[id],
-						},
-					},
-				},
-			}
+			query := bson.M{"_id": id, StockAmount: bson.M{"$gte": amounts[id]}}
+			update := bson.M{"$inc": bson.M{StockAmount: -amounts[id]}}
 
-			_, err := o.StockCollection.UpdateOne(sessCtx, query, add)
-			if err != nil {
-				return nil, err
+			res := o.StockCollection.FindOneAndUpdate(sessCtx, query, update)
+			if res.Err() != nil {
+				return nil, res.Err()
 			}
 		}
 
