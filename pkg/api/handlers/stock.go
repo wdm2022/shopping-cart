@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"fmt"
 	"log"
 	stockApi "shopping-cart/api/proto/stock"
 	"shopping-cart/pkg/stock"
@@ -24,10 +23,10 @@ func GetStock(c *fiber.Ctx) error {
 		log.Printf("Error when executing Find: %v", err)
 		return c.Status(fiber.StatusBadRequest).SendString(err.Error())
 	}
-	float, err := strconv.ParseFloat(fmt.Sprintf("%f", float64(response.Price)/100.0), 64)
+	//float, err := strconv.ParseFloat(fmt.Sprintf("%f", float64(response.Price)/100.0), 64)
 	return c.JSON(fiber.Map{
 		"stock": response.Stock,
-		"price": float,
+		"price": response.Price / 100,
 	})
 }
 
