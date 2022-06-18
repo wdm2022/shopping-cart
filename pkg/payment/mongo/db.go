@@ -3,6 +3,7 @@ package mongo
 import (
 	"context"
 	"errors"
+	"fmt"
 	"log"
 	"shopping-cart/pkg/db"
 	"shopping-cart/pkg/utils"
@@ -234,7 +235,10 @@ func (p *PaymentConnection) Rollback(txId string) error {
 			},
 		}
 		logRes := p.LogCollection.FindOneAndUpdate(sessCtx, query, update)
-		if logRes.Err() != nil {
+		if logRes.Err() == mongo.ErrNoDocuments {
+			fmt.Println("allready rollbacked")
+			return nil, nil
+		} else if logRes.Err() != nil {
 			return nil, logRes.Err()
 		}
 		payLog := &Log{}
@@ -251,11 +255,15 @@ func (p *PaymentConnection) Rollback(txId string) error {
 				Credit: payLog.Amount,
 			},
 			"$pull": bson.M{
-				"orders": bson.M{"order_id": payLog.TxId},
+				"orders": bson.M{"order_id": payLog.OrderId},
 			},
 		}
 
-		p.PaymentCollection.FindOneAndUpdate(sessCtx, query, update)
+		userRes := p.PaymentCollection.FindOneAndUpdate(sessCtx, query, update)
+		if userRes.Err() != nil {
+			fmt.Println("failed to rollbackk tx :  ", payLog.TxId, " user ", payLog.UserId)
+			return nil, userRes.Err()
+		}
 
 		return nil, nil
 	}

@@ -15,6 +15,7 @@ import (
 	mongo2 "shopping-cart/pkg/order/mongo"
 	"shopping-cart/pkg/payment"
 	"shopping-cart/pkg/stock"
+	"shopping-cart/pkg/utils"
 )
 
 type orderServer struct {
@@ -109,7 +110,7 @@ func (o orderServer) Checkout(ctx context.Context, in *orderApi.CheckoutRequest)
 	// use random as an txid
 	txId := primitive.NewObjectID().Hex()
 
-	err := o.orderConn.StartTransaction(txId)
+	err := o.orderConn.StartTransaction(txId, in.OrderId)
 	if err != nil {
 		return nil, err
 	}
@@ -122,12 +123,14 @@ func (o orderServer) Checkout(ctx context.Context, in *orderApi.CheckoutRequest)
 	})
 	if orderErr != nil {
 		log.Println("could not find order")
+		o.orderConn.RevertTransaction(txId)
 		return nil, orderErr
 	}
 
 	// Calculate the total cost of the order
 	totalCost, stockErr := stock.TotalCost(&stockApi.TotalCostRequest{ItemIds: itemIds})
 	if stockErr != nil {
+		o.orderConn.RevertTransaction(txId)
 		log.Println("could not calculate total cost")
 		return nil, stockErr
 	}
@@ -147,9 +150,18 @@ func (o orderServer) Checkout(ctx context.Context, in *orderApi.CheckoutRequest)
 		// Something went wrong while subtracting the batch, payment has to be reverted
 		_, rollbackErr := payment.Rollback(&paymentApi.RollbackRequest{TxId: txId})
 		if rollbackErr != nil {
+			log.Println("rollback failed")
 			stockErr2 = rollbackErr
+		} else {
+			o.orderConn.RevertTransaction(txId)
 		}
 		return nil, stockErr2
+	}
+
+	err = o.orderConn.PayOrder(in.OrderId)
+	if err != nil {
+		log.Println("failed to set order status to paid ", err)
+		return nil, err
 	}
 
 	err = o.orderConn.EndTransaction(txId)
@@ -171,6 +183,46 @@ func RunGrpcServer(client *mongo.Client, port *int) error {
 	orderConn := mongo2.Init(client)
 
 	transactions, err := orderConn.FindOpenTransactions()
+	go func() {
+		for _, log := range transactions {
+			txid := log.TxId
+			log := log
+			go func() {
+				_, cancel := utils.ContextWithTimeOut10()
+				defer cancel()
+				err := orderConn.Lock(txid.Hex())
+				if err != nil {
+					fmt.Println("failed to rollback ", err)
+					return
+				}
+
+				_, err = payment.Rollback(&paymentApi.RollbackRequest{TxId: txid.Hex()})
+				if err != nil {
+					fmt.Println("failed to rollback payment", err)
+					return
+				}
+
+				_, err = stock.Rollback(&stockApi.RollBackRequest{TxId: txid.Hex()})
+				if err != nil {
+					fmt.Println("failed to rollback stock", err)
+					return
+				}
+
+				err = orderConn.UnpayOrder(log.OrderId.Hex())
+				if err != nil {
+					fmt.Println("failed to rollback unpay", err)
+					return
+				}
+
+				err = orderConn.RevertTransaction(txid.Hex())
+				if err != nil {
+					fmt.Println("failed to rollback revert order", err)
+					return
+				}
+
+			}()
+		}
+	}()
 	if err != nil {
 		return err
 	}

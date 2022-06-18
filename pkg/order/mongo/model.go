@@ -19,6 +19,8 @@ type Order struct {
 }
 
 type Log struct {
-	TxId   primitive.ObjectID `bson:"_id"`
-	Status string             `bson:"status"` //"started,done,reverted"
+	TxId    primitive.ObjectID `bson:"_id"`
+	OrderId primitive.ObjectID `bson:"order_id"`
+	Time    primitive.DateTime `bson:"time"`
+	Status  string             `bson:"status"` //"started,done,reverted"
 }
