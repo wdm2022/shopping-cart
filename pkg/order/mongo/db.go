@@ -6,6 +6,7 @@ import (
 	sf "github.com/sa-/slicefunk"
 	"shopping-cart/pkg/db"
 	"shopping-cart/pkg/utils"
+	"time"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -166,18 +167,89 @@ func (orderConn *OrdersConnection) AddItem(orderId string, itemId string) error 
 	return nil
 }
 
-func (orderConn *OrdersConnection) StartTransaction(txId string) error {
-	objTxId, err := primitive.ObjectIDFromHex(txId)
+func (orderConn *OrdersConnection) PayOrder(orderId string) error {
+	objOrderId, err := primitive.ObjectIDFromHex(orderId)
 	if err != nil {
 		return err
 	}
 
+	update := bson.M{
+		"$set": bson.M{
+			"paid": true,
+		},
+	}
+
+	query := bson.D{
+		primitive.E{
+			Key:   OrderId,
+			Value: objOrderId,
+		},
+	}
+
+	res, err := orderConn.OrderCollection.UpdateOne(context.Background(), query, update)
+
+	if err != nil {
+		return err
+	}
+	if res.ModifiedCount > 1 {
+		return errors.New("updated multiple documents")
+	}
+	if res.ModifiedCount == 0 {
+		return errors.New("updated 0 documents")
+	}
+	return nil
+}
+
+func (orderConn *OrdersConnection) UnpayOrder(orderId string) error {
+	objOrderId, err := primitive.ObjectIDFromHex(orderId)
+	if err != nil {
+		return err
+	}
+
+	update := bson.M{
+		"$set": bson.M{
+			"paid": false,
+		},
+	}
+
+	query := bson.D{
+		primitive.E{
+			Key:   OrderId,
+			Value: objOrderId,
+		},
+	}
+
+	res, err := orderConn.OrderCollection.UpdateOne(context.Background(), query, update)
+
+	if err != nil {
+		return err
+	}
+	if res.ModifiedCount > 1 {
+		return errors.New("updated multiple documents")
+	}
+	if res.ModifiedCount == 0 {
+		return errors.New("updated 0 documents")
+	}
+	return nil
+}
+
+func (orderConn *OrdersConnection) StartTransaction(txId string, orderId string) error {
+	objTxId, err := primitive.ObjectIDFromHex(txId)
+	if err != nil {
+		return err
+	}
+	objOrderId, err := primitive.ObjectIDFromHex(txId)
+	if err != nil {
+		return err
+	}
 	ctx, cancel := utils.ContextWithTimeOut()
 	defer cancel()
 
 	_, err = orderConn.LogCollection.InsertOne(ctx, Log{
-		TxId:   objTxId,
-		Status: "started",
+		TxId:    objTxId,
+		Time:    primitive.NewDateTimeFromTime(time.Now()),
+		OrderId: objOrderId,
+		Status:  "started",
 	})
 	if err != nil {
 		return err
@@ -224,18 +296,15 @@ func (orderConn *OrdersConnection) RevertTransaction(txId string) error {
 	ctx, cancel := utils.ContextWithTimeOut()
 	defer cancel()
 
-	query := bson.D{
-		primitive.E{
-			Key:   "_id", //todo txid
-			Value: objTxId,
-		},
+	query := primitive.M{
+		"_id": objTxId,
 	}
 
-	//don't use literals
-	update := bson.D{{
-		Key:   "status",
-		Value: "reverted",
-	}}
+	//todo don't use literals
+	update := primitive.M{
+		"$set": primitive.M{
+			"status": "reverted",
+		}}
 
 	_, err = orderConn.LogCollection.UpdateOne(ctx, query, update)
 	if err != nil {
