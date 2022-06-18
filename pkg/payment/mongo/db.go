@@ -252,7 +252,7 @@ func (p *PaymentConnection) Rollback(txId string) error {
 				Credit: payLog.Amount,
 			},
 			"$pull": bson.M{
-				"orders": bson.M{"order_id": payLog.TxId},
+				"orders": bson.M{"order_id": payLog.OrderId},
 			},
 		}
 
