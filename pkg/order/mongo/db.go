@@ -3,7 +3,6 @@ package mongo
 import (
 	"context"
 	"errors"
-	sf "github.com/sa-/slicefunk"
 	"shopping-cart/pkg/db"
 	"shopping-cart/pkg/utils"
 	"time"
@@ -227,9 +226,6 @@ func (orderConn *OrdersConnection) UnpayOrder(orderId string) error {
 	if res.ModifiedCount > 1 {
 		return errors.New("updated multiple documents")
 	}
-	if res.ModifiedCount == 0 {
-		return errors.New("updated 0 documents")
-	}
 	return nil
 }
 
@@ -287,6 +283,34 @@ func (orderConn *OrdersConnection) EndTransaction(txId string) error {
 
 }
 
+func (orderConn *OrdersConnection) Lock(txId string) error {
+	objTxId, err := primitive.ObjectIDFromHex(txId)
+	if err != nil {
+		return err
+	}
+
+	ctx, cancel := utils.ContextWithTimeOut()
+	defer cancel()
+
+	query := primitive.M{
+		"_id": objTxId,
+	}
+
+	//todo don't use literals
+	update := primitive.M{
+		"$set": primitive.M{
+			"time": primitive.NewDateTimeFromTime(time.Now()),
+		}}
+
+	res := orderConn.LogCollection.FindOneAndUpdate(ctx, query, update)
+	if res.Err() != nil {
+		return res.Err()
+	}
+
+	return nil
+
+}
+
 func (orderConn *OrdersConnection) RevertTransaction(txId string) error {
 	objTxId, err := primitive.ObjectIDFromHex(txId)
 	if err != nil {
@@ -315,14 +339,14 @@ func (orderConn *OrdersConnection) RevertTransaction(txId string) error {
 
 }
 
-func (orderConn *OrdersConnection) FindOpenTransactions() ([]primitive.ObjectID, error) {
+func (orderConn *OrdersConnection) FindOpenTransactions() ([]Log, error) {
 
 	ctx, cancel := utils.ContextWithTimeOut()
 	defer cancel()
-	query := bson.D{
-		primitive.E{
-			Key:   "status",
-			Value: "started",
+	query := bson.M{
+		"status": "started",
+		"time": bson.M{
+			"$lt": primitive.NewDateTimeFromTime(time.Now().Add(-time.Second * 20)), // assume that after 20 secs tx is dead
 		},
 	}
 
@@ -338,9 +362,7 @@ func (orderConn *OrdersConnection) FindOpenTransactions() ([]primitive.ObjectID,
 		return nil, err
 	}
 
-	return sf.Map(results, func(t Log) primitive.ObjectID {
-		return t.TxId
-	}), nil
+	return results, nil
 }
 
 /*

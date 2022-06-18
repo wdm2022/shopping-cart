@@ -235,7 +235,10 @@ func (p *PaymentConnection) Rollback(txId string) error {
 			},
 		}
 		logRes := p.LogCollection.FindOneAndUpdate(sessCtx, query, update)
-		if logRes.Err() != nil {
+		if logRes.Err() == mongo.ErrNoDocuments {
+			fmt.Println("allready rollbacked")
+			return nil, nil
+		} else if logRes.Err() != nil {
 			return nil, logRes.Err()
 		}
 		payLog := &Log{}

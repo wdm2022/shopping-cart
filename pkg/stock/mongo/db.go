@@ -3,6 +3,7 @@ package mongo
 import (
 	"context"
 	"errors"
+	"fmt"
 	sf "github.com/sa-/slicefunk"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -272,6 +273,78 @@ func (o *StockConnection) SubtractBatchStock(txId string, itemIds []string) erro
 		})
 		if err != nil {
 			return nil, err
+		}
+
+		return nil, nil
+	}
+	session, err := o.Client.StartSession()
+	if err != nil {
+		return err
+	}
+	defer session.EndSession(ctx)
+	_, err = session.WithTransaction(ctx, callback)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (o *StockConnection) RollBack(txId string) error {
+	// TODO: Add DB call to remove the stock using the provided list of items. #Rahim :)
+
+	objTxId, err := primitive.ObjectIDFromHex(txId)
+	if err != nil {
+		return err
+	}
+
+	ctx, cancel := utils.ContextWithTimeOut()
+	defer cancel()
+	callback := func(sessCtx mongo.SessionContext) (interface{}, error) {
+
+		logRes := o.LogCollection.FindOneAndUpdate(sessCtx,
+			bson.M{
+				"_id": objTxId,
+				"status": bson.M{
+					"$ne": "reverted",
+				},
+			},
+			bson.M{
+				"$set": bson.M{
+					"status": "reverted",
+				},
+			})
+
+		if logRes.Err() == mongo.ErrNoDocuments {
+			// we have not handled this yet
+			fmt.Println("allready handled ", txId)
+			return nil, nil
+		} else if logRes.Err() != nil {
+
+			return false, logRes.Err()
+		}
+		log := &Log{}
+
+		err := logRes.Decode(log)
+		if err != nil {
+			return nil, err
+		}
+
+		amounts := make(map[primitive.ObjectID]int64)
+		_ = sf.Map(log.Items, func(t primitive.ObjectID) error {
+			amounts[t] = amounts[t] + 1
+			return nil
+		})
+
+		//todo How do to all of this in one call to database.
+		for _, id := range log.Items {
+			query := bson.M{"_id": id}
+			update := bson.M{"$inc": bson.M{StockAmount: amounts[id]}}
+
+			res := o.StockCollection.FindOneAndUpdate(sessCtx, query, update)
+			if res.Err() != nil {
+				return nil, res.Err()
+			}
 		}
 
 		return nil, nil

@@ -104,6 +104,17 @@ func (o stockServer) AddBatch(ctx context.Context, in *stockApi.AddBatchRequest)
 	return &stockApi.EmptyMessage{}, nil
 }
 
+func (o stockServer) RollBack(ctx context.Context, in *stockApi.RollBackRequest) (*stockApi.EmptyMessage, error) {
+	fmt.Println("Received rollbackrequest for tx ", in.TxId)
+
+	err := o.stockConn.RollBack(in.TxId)
+	if err != nil {
+		return nil, err
+	}
+
+	return &stockApi.EmptyMessage{}, nil
+}
+
 func RunGrpcServer(client *mongo.Client, port *int) error {
 	lis, err := net.Listen("tcp", fmt.Sprintf(":%d", *port))
 	if err != nil {

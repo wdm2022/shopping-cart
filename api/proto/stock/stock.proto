@@ -10,10 +10,13 @@ service Stock {
   rpc SubtractBatch (SubtractBatchRequest) returns (EmptyMessage) {}
   rpc Add (AddRequest) returns (EmptyMessage) {}
   rpc AddBatch (AddBatchRequest) returns (EmptyMessage) {}
+  rpc RollBack (RollBackRequest) returns (EmptyMessage){}
   rpc Create (CreateRequest) returns (CreateResponse) {}
   rpc TotalCost (TotalCostRequest) returns (TotalCostResponse) {}
 }
-
+message  RollBackRequest{
+  string txId = 1;
+}
 message FindRequest {
   string itemId = 1;
 }

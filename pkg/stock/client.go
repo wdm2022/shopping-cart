@@ -69,3 +69,9 @@ func SubtractBatch(request *stockApi.SubtractBatchRequest) (*stockApi.EmptyMessa
 	defer cel()
 	return client.SubtractBatch(ctx, request)
 }
+
+func Rollback(request *stockApi.RollBackRequest) (*stockApi.EmptyMessage, error) {
+	ctx, cel := createContext()
+	defer cel()
+	return client.RollBack(ctx, request)
+}

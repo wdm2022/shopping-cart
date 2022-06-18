@@ -15,6 +15,7 @@ import (
 	mongo2 "shopping-cart/pkg/order/mongo"
 	"shopping-cart/pkg/payment"
 	"shopping-cart/pkg/stock"
+	"shopping-cart/pkg/utils"
 )
 
 type orderServer struct {
@@ -182,6 +183,46 @@ func RunGrpcServer(client *mongo.Client, port *int) error {
 	orderConn := mongo2.Init(client)
 
 	transactions, err := orderConn.FindOpenTransactions()
+	go func() {
+		for _, log := range transactions {
+			txid := log.TxId
+			log := log
+			go func() {
+				_, cancel := utils.ContextWithTimeOut10()
+				defer cancel()
+				err := orderConn.Lock(txid.Hex())
+				if err != nil {
+					fmt.Println("failed to rollback ", err)
+					return
+				}
+
+				_, err = payment.Rollback(&paymentApi.RollbackRequest{TxId: txid.Hex()})
+				if err != nil {
+					fmt.Println("failed to rollback payment", err)
+					return
+				}
+
+				_, err = stock.Rollback(&stockApi.RollBackRequest{TxId: txid.Hex()})
+				if err != nil {
+					fmt.Println("failed to rollback stock", err)
+					return
+				}
+
+				err = orderConn.UnpayOrder(log.OrderId.Hex())
+				if err != nil {
+					fmt.Println("failed to rollback unpay", err)
+					return
+				}
+
+				err = orderConn.RevertTransaction(txid.Hex())
+				if err != nil {
+					fmt.Println("failed to rollback revert order", err)
+					return
+				}
+
+			}()
+		}
+	}()
 	if err != nil {
 		return err
 	}
