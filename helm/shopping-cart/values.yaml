@@ -58,7 +58,36 @@ apiGateway:
   #   memory: 128Mi
   nodeSelector: {}
   tolerations: []
-  affinity: {}
+  affinity:
+    nodeAffinity:
+      preferredDuringSchedulingIgnoredDuringExecution:
+        - weight: 100
+          preference:
+            matchExpressions:
+              - key: "node-type"
+                operator: NotIn
+                values:
+                  - "mongo"
+    podAffinity:
+      preferredDuringSchedulingIgnoredDuringExecution:
+        - weight: 10
+          podAffinityTerm:
+            topologyKey: "kubernetes.io/hostname"
+            labelSelector:
+              matchExpressions:
+                - key: "shopping-cart/service"
+                  operator: DoesNotExist
+    podAntiAffinity:
+      preferredDuringSchedulingIgnoredDuringExecution:
+        - weight: 1
+          podAffinityTerm:
+            topologyKey: "kubernetes.io/hostname"
+            labelSelector:
+              matchExpressions:
+                - key: "shopping-cart/service"
+                  operator: In
+                  values:
+                    - "api-gateway"
 
 orderService:
   replicaCount: 1
@@ -104,7 +133,36 @@ orderService:
   #   memory: 128Mi
   nodeSelector: {}
   tolerations: []
-  affinity: {}
+  affinity:
+    nodeAffinity:
+      preferredDuringSchedulingIgnoredDuringExecution:
+        - weight: 100
+          preference:
+            matchExpressions:
+              - key: "node-type"
+                operator: NotIn
+                values:
+                  - "mongo"
+    podAffinity:
+      preferredDuringSchedulingIgnoredDuringExecution:
+        - weight: 10
+          podAffinityTerm:
+            topologyKey: "kubernetes.io/hostname"
+            labelSelector:
+              matchExpressions:
+                - key: "shopping-cart/service"
+                  operator: DoesNotExist
+    podAntiAffinity:
+      preferredDuringSchedulingIgnoredDuringExecution:
+        - weight: 1
+          podAffinityTerm:
+            topologyKey: "kubernetes.io/hostname"
+            labelSelector:
+              matchExpressions:
+                - key: "shopping-cart/service"
+                  operator: In
+                  values:
+                    - "order"
 
 paymentService:
   replicaCount: 1
@@ -150,7 +208,36 @@ paymentService:
   #   memory: 128Mi
   nodeSelector: {}
   tolerations: []
-  affinity: {}
+  affinity:
+    nodeAffinity:
+      preferredDuringSchedulingIgnoredDuringExecution:
+        - weight: 100
+          preference:
+            matchExpressions:
+              - key: "node-type"
+                operator: NotIn
+                values:
+                  - "mongo"
+    podAffinity:
+      preferredDuringSchedulingIgnoredDuringExecution:
+        - weight: 10
+          podAffinityTerm:
+            topologyKey: "kubernetes.io/hostname"
+            labelSelector:
+              matchExpressions:
+                - key: "shopping-cart/service"
+                  operator: DoesNotExist
+    podAntiAffinity:
+      preferredDuringSchedulingIgnoredDuringExecution:
+        - weight: 1
+          podAffinityTerm:
+            topologyKey: "kubernetes.io/hostname"
+            labelSelector:
+              matchExpressions:
+                - key: "shopping-cart/service"
+                  operator: In
+                  values:
+                    - "payment"
 
 stockService:
   replicaCount: 1
@@ -196,7 +283,36 @@ stockService:
   #   memory: 128Mi
   nodeSelector: {}
   tolerations: []
-  affinity: {}
+  affinity:
+    nodeAffinity:
+      preferredDuringSchedulingIgnoredDuringExecution:
+        - weight: 100
+          preference:
+            matchExpressions:
+              - key: "node-type"
+                operator: NotIn
+                values:
+                  - "mongo"
+    podAffinity:
+      preferredDuringSchedulingIgnoredDuringExecution:
+        - weight: 10
+          podAffinityTerm:
+            topologyKey: "kubernetes.io/hostname"
+            labelSelector:
+              matchExpressions:
+                - key: "shopping-cart/service"
+                  operator: DoesNotExist
+    podAntiAffinity:
+      preferredDuringSchedulingIgnoredDuringExecution:
+        - weight: 1
+          podAffinityTerm:
+            topologyKey: "kubernetes.io/hostname"
+            labelSelector:
+              matchExpressions:
+                - key: "shopping-cart/service"
+                  operator: In
+                  values:
+                    - "stock"
 
 mongodb-order:
   architecture: "replicaset"
@@ -219,6 +335,11 @@ mongodb-order:
   livenessProbe:
     periodSeconds: 120
     timeoutSeconds: 60
+  nodeAffinityPreset:
+    type: soft
+    key: "node-type"
+    values:
+      - "mongo"
 
 mongodb-payment:
   architecture: "replicaset"
@@ -241,6 +362,11 @@ mongodb-payment:
   livenessProbe:
     periodSeconds: 120
     timeoutSeconds: 60
+  nodeAffinityPreset:
+    type: soft
+    key: "node-type"
+    values:
+      - "mongo"
 
 mongodb-stock:
   architecture: "replicaset"
@@ -263,3 +389,8 @@ mongodb-stock:
   livenessProbe:
     periodSeconds: 120
     timeoutSeconds: 60
+  nodeAffinityPreset:
+    type: soft
+    key: "node-type"
+    values:
+      - "mongo"
