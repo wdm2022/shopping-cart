@@ -139,7 +139,7 @@ func (p *PaymentConnection) PayOrder(txId string, userId string, orderId string,
 		// for if this is not used in a sage, but with the "endpoint"
 		emptyHex := primitive.ObjectID{}.Hex()
 		if txId != emptyHex {
-			logRes := p.LogCollection.FindOne(sessCtx, bson.D{{LogId, objTxId}})
+			logRes := p.LogCollection.FindOne(sessCtx, bson.D{primitive.E{Key: LogId, Value: objTxId}})
 
 			if logRes.Err() == mongo.ErrNoDocuments {
 				// we have not handled this yet
