@@ -3,6 +3,7 @@ package mongo
 import (
 	"context"
 	"errors"
+	"fmt"
 	"shopping-cart/pkg/db"
 	"shopping-cart/pkg/utils"
 	"time"
@@ -211,11 +212,8 @@ func (orderConn *OrdersConnection) UnpayOrder(orderId string) error {
 		},
 	}
 
-	query := bson.D{
-		primitive.E{
-			Key:   OrderId,
-			Value: objOrderId,
-		},
+	query := bson.M{
+		OrderId: objOrderId,
 	}
 
 	res, err := orderConn.OrderCollection.UpdateOne(context.Background(), query, update)
@@ -226,6 +224,9 @@ func (orderConn *OrdersConnection) UnpayOrder(orderId string) error {
 	if res.ModifiedCount > 1 {
 		return errors.New("updated multiple documents")
 	}
+	if res.ModifiedCount == 0 {
+		fmt.Println("updated 0")
+	}
 	return nil
 }
 
@@ -234,7 +235,7 @@ func (orderConn *OrdersConnection) StartTransaction(txId string, orderId string)
 	if err != nil {
 		return err
 	}
-	objOrderId, err := primitive.ObjectIDFromHex(txId)
+	objOrderId, err := primitive.ObjectIDFromHex(orderId)
 	if err != nil {
 		return err
 	}
