@@ -167,9 +167,6 @@ func (o *StockConnection) FindStock(itemId string) (*Stock, error) {
 }
 
 func (o *StockConnection) CalculateTotalCost(itemIds []string) (int64, error) {
-	if len(itemIds) == 0 {
-		return 0, nil
-	}
 	objIds := sf.Map(itemIds, func(t string) primitive.ObjectID {
 		id, err := primitive.ObjectIDFromHex(t)
 		if err != nil {
@@ -214,10 +211,7 @@ func (o *StockConnection) CalculateTotalCost(itemIds []string) (int64, error) {
 	//	total string             `bson:"total"`
 	//}
 
-	ok := aggregate.Next(ctx)
-	if !ok {
-		return 0, errors.New("could not calculate test")
-	}
+	aggregate.Next(ctx)
 	totcalCost, ok := aggregate.Current.Index(1).Value().Int64OK()
 	if !ok {
 		return 0, errors.New("failed to convert to int")
