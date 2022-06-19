@@ -7,6 +7,7 @@
 * Rahim Klabér
 * Melchior Oudemans
 * Koen Hagen
+* Dan Plămădeală
 
 ## Deployment requirements
 
@@ -17,20 +18,20 @@
 
 ## Deployment guide
 
-The system is delivered as a Helm Chart and can be simply installed with one command:
+The system is delivered as a Helm Chart and can be installed with one command:
 
 ```shell
 helm install shopping-cart shopping-cart-1.0.0.tgz
 ```
 
-Or alternatively, by using Helm Chart repository, hosted on GitHub:
+Alternatively, by using the Helm Chart repository, hosted on GitHub:
 
 ```shell
 helm repo add shopping-cart https://wdm2022.github.io/shopping-cart/
 helm upgrade --install shopping-cart shopping-cart/shopping-cart
 ```
 
-The Chart will display in its deployment notes the information on how to connect to the API gateway of the system, 
+The Chart will display in its deployment notes the information on how to connect to the API gateway of the system,
 depending on how the system was deployed:
 * URL if Ingress was used
 * port exposed on one of the cluster's workers if `NodePort` service type was used
@@ -38,7 +39,7 @@ depending on how the system was deployed:
 * commands to execute locally to perform port forwarding to the Kubernetes' service if `ClusterIP` service type was used (default)
 
 The default installation will deploy one instance of each microservice and three single-replica MongoDB clusters.
-This is preferable for Kubernetes clusters with limited resources (eg. minikube), but does not offer high availability.
+This is preferable for Kubernetes clusters with limited resources (e.g. minikube), but does not offer high availability.
 In order to deploy the system with multiple replicas of each microservice and MongoDB clusters with two replicas, execute:
 
 ```shell
@@ -48,7 +49,7 @@ helm upgrade --install shopping-cart shopping-cart-1.0.0.tgz --values ha-values.
 helm upgrade --install shopping-cart shopping-cart/shopping-cart --values ha-values.yml
 ```
 
-If the cluster has Ingress controller configured, it is possible to conveniently expose the API gateway through it
+If the cluster has the Ingress controller configured, it is possible to expose the API gateway through it conveniently
 by setting the desired hostname in the _ha-ingress-values.yml_ file and deploying it:
 
 ```shell
@@ -58,14 +59,14 @@ helm upgrade --install shopping-cart shopping-cart-1.0.0.tgz --values ha-ingress
 helm upgrade --install shopping-cart shopping-cart/shopping-cart --values ha-ingress-values.yml
 ```
 
-The amount of replicas can be adjusted in the _ha-values.yml_ and _ha-ingress-values.yml_ file.
+The number of replicas can be adjusted in the _ha-values.yml_ and _ha-ingress-values.yml_ files.
 
 ## Testing resilience
 
-Our recommended tool for testing resilience of the system is [k9s](https://k9scli.io/), 
+Our recommended tool for testing the resilience of the system is [k9s](https://k9scli.io/),
 a text user interface client (TUI) for Kubernetes.
 
-It gives an easy insight into the cluster resources, allows to monitor status of individual Pods
+It gives an accessible insight into the cluster resources and allows to monitor the status of individual Pods
 as well as their CPU and memory usage.
-It also allows to delete Pods to check how the system behaves when there are failing components in the system
-and shows how quickly these components are recreated by the cluster.
+It also allows deleting Pods to check how the system behaves when there are failing components in the system.
+Moreover, it shows how quickly the cluster recreates these components.
