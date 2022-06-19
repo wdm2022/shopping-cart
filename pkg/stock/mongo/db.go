@@ -244,7 +244,7 @@ func (o *StockConnection) SubtractBatchStock(txId string, itemIds []string) erro
 	defer cancel()
 	callback := func(sessCtx mongo.SessionContext) (interface{}, error) {
 
-		logRes := o.LogCollection.FindOne(sessCtx, bson.D{{"_id", objTxId}})
+		logRes := o.LogCollection.FindOne(sessCtx, bson.D{primitive.E{Key: "_id", Value: objTxId}})
 
 		if logRes.Err() == mongo.ErrNoDocuments {
 			// we have not handled this yet
