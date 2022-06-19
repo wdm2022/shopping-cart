@@ -18,16 +18,16 @@
 
 ## Deployment guide
 
-The system is delivered as a Helm Chart and can be installed with one command:
-
-```shell
-helm install shopping-cart shopping-cart-1.0.0.tgz
-```
-
-Alternatively, by using the Helm Chart repository, hosted on GitHub:
+The system is delivered as a Helm Chart from the repository, hosted on GitHub.
+The repository can be added with the following command:
 
 ```shell
 helm repo add shopping-cart https://wdm2022.github.io/shopping-cart/
+```
+
+Then, the system can be installed with:
+
+```shell
 helm upgrade --install shopping-cart shopping-cart/shopping-cart
 ```
 
@@ -43,9 +43,6 @@ This is preferable for Kubernetes clusters with limited resources (e.g. minikube
 In order to deploy the system with multiple replicas of each microservice and MongoDB clusters with two replicas, execute:
 
 ```shell
-# From archive
-helm upgrade --install shopping-cart shopping-cart-1.0.0.tgz --values ha-values.yml
-# From repo
 helm upgrade --install shopping-cart shopping-cart/shopping-cart --values ha-values.yml
 ```
 
@@ -53,9 +50,6 @@ If the cluster has the Ingress controller configured, it is possible to expose t
 by setting the desired hostname in the _ha-ingress-values.yml_ file and deploying it:
 
 ```shell
-# From archive
-helm upgrade --install shopping-cart shopping-cart-1.0.0.tgz --values ha-ingress-values.yml
-# From repo
 helm upgrade --install shopping-cart shopping-cart/shopping-cart --values ha-ingress-values.yml
 ```
 
