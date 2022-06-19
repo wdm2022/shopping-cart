@@ -27,7 +27,7 @@ spec:
     - host: {{ . | quote }}
       http:
         paths:
-          - path: /order
+          - path: /orders
             pathType: Prefix
             backend:
               service:
@@ -41,7 +41,7 @@ spec:
                 name: {{ $fullName }}
                 port:
                   number: {{ $svcPort }}
-          - path: /service
+          - path: /stock
             pathType: Prefix
             backend:
               service:
