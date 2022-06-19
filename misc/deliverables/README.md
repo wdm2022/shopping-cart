@@ -27,7 +27,7 @@ Or alternatively, by using Helm Chart repository, hosted on GitHub:
 
 ```shell
 helm repo add shopping-cart https://wdm2022.github.io/shopping-cart/
-helm upgrade --install shopping-cart shopping-cart
+helm upgrade --install shopping-cart shopping-cart/shopping-cart
 ```
 
 The Chart will display in its deployment notes the information on how to connect to the API gateway of the system, 
@@ -45,10 +45,20 @@ In order to deploy the system with multiple replicas of each microservice and Mo
 # From archive
 helm upgrade --install shopping-cart shopping-cart-1.0.0.tgz --values ha-values.yml
 # From repo
-helm upgrade --install shopping-cart shopping-cart --values ha-values.yml
+helm upgrade --install shopping-cart shopping-cart/shopping-cart --values ha-values.yml
 ```
 
-The amount of replicas can be adjusted in the _ha-values.yml_ file.
+If the cluster has Ingress controller configured, it is possible to conveniently expose the API gateway through it
+by setting the desired hostname in the _ha-ingress-values.yml_ file and deploying it:
+
+```shell
+# From archive
+helm upgrade --install shopping-cart shopping-cart-1.0.0.tgz --values ha-ingress-values.yml
+# From repo
+helm upgrade --install shopping-cart shopping-cart/shopping-cart --values ha-ingress-values.yml
+```
+
+The amount of replicas can be adjusted in the _ha-values.yml_ and _ha-ingress-values.yml_ file.
 
 ## Testing resilience
 
